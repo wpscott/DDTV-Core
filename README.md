@@ -11,7 +11,7 @@ BiliBiliLiveServer是一个简单的控制台项目用于转发BiliBili的直播
 4. 观看直播
 
 ## DDTV-FFmpeg
-基于WPF和FFmpeg的BiliBili直播播放器。
+基于WPF和FFmpeg的BiliBili直播播放器。**该播放器占用较高。**
 ### 使用方式
 1. 编译
 2. 运行DDTV-FFmpeg.exe 房间号（如：12235923）
