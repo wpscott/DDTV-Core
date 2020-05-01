@@ -1,6 +1,7 @@
 # DDTV-Core
 DDTV-Core是用C# 和 .Net Core 3.1编写的BiliBili直播播放工具。
-该项目分为3个子项目
+该项目分为3个子项目。
+**不提供32位程序。**
 
 ## BilibiliLiveServer
 BiliBiliLiveServer是一个简单的控制台项目用于转发BiliBili的直播视频流。
