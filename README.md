@@ -11,6 +11,9 @@ BiliBiliLiveServer是一个简单的控制台项目用于转发BiliBili的直播
 2. 运行BiliBIliLiveServer.exe。请确保29119端口没有被使用。
 3. 使用任何你喜欢的播放器如VLC或MPV，访问http://localhost:29119/房间号（如：12235923）
 4. 观看直播
+#### 例子
+![例子](https://raw.githubusercontent.com/wpscott/DDTV-Core/master/sample/sample.png)
+*GPU占用高是因为[Wallpaper Engine](https://www.wallpaperengine.io/)*
 
 ## DDTV-FFmpeg
 基于WPF和[ffmediaelement](https://github.com/unosquare/ffmediaelement)的BiliBili直播播放器。**适合DD** （**该播放器占用较高**）
