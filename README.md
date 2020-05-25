@@ -1,15 +1,23 @@
 
 # DDTV-Core
 DDTV-Core是用C# 和 .Net Core 3.1编写的BiliBili直播播放工具。
-该项目分为3个子项目。
+该项目分为4个子项目。
 **不提供32位程序。**
+
+## AcFunLiveServer
+AcFunLiveServer是一个简单的控制台项目用于获取AcFun的直播视频流。**适合DD及单推**
+### 使用方式
+1. 编译
+2. 运行ACFunLiveServer.exe。请确保62114端口没有被使用。
+3. 使用任何你喜欢的播放器如VLC或MPV，访问http://localhost:62114/用户ID （如：69065、23682490或156843）
+4. 观看直播
 
 ## BilibiliLiveServer
 BiliBiliLiveServer是一个简单的控制台项目用于转发BiliBili的直播视频流。**适合DD及单推**
 ### 使用方式
 1. 编译
 2. 运行BiliBIliLiveServer.exe。请确保29119端口没有被使用。
-3. 使用任何你喜欢的播放器如VLC或MPV，访问http://localhost:29119/房间号（如：12235923）
+3. 使用任何你喜欢的播放器如VLC或MPV，访问http://localhost:29119/房间号 （如：12235923）
 4. 观看直播
 #### 例子
 ![例子](https://raw.githubusercontent.com/wpscott/DDTV-Core/master/sample/sample.png)
