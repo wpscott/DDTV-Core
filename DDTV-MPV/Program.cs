@@ -14,14 +14,14 @@ namespace DDTV_MPV
         [STAThread]
         static void Main(string[] args)
         {
-            if (args.Length == 1)
+            if (args.Length == 2)
             {
-                Task.Run(async () => await BilibiliLiveServer.Server.Start());
+                //Task.Run(async () => await BilibiliLiveServer.Server.Start());
 
                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new Form1(args[0]));
+                Application.Run(new Form1(args[0], args[1]));
             }
         }
     }

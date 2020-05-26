@@ -1,5 +1,4 @@
-﻿using BilibiliLiveServer;
-using Mpv.NET.Player;
+﻿using Mpv.NET.Player;
 using System;
 using System.Windows.Forms;
 
@@ -11,9 +10,11 @@ namespace DDTV_MPV
 
         private MpvPlayer player;
         private string id;
+        private string platform;
 
-        public Form1(string id)
+        public Form1(string platform, string id)
         {
+            this.platform = platform;
             this.id = id;
             InitializeComponent();
 
@@ -93,7 +94,29 @@ namespace DDTV_MPV
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            player.Load($@"{Server.Address}/{id}");
+            switch (platform)
+            {
+                case "a":
+                case "A":
+                case "ac":
+                case "AC":
+                case "AcFun":
+                case "ACFun":
+                    player.Load($@"{AcFunLiveServer.Server.Address}/{id}");
+                    break;
+                case "b":
+                case "B":
+                case "bili":
+                    case "Bili":
+                case "bilibili":
+                case "Bilibili":
+                case "BiliBili":
+                    player.Load($@"{BilibiliLiveServer.Server.Address}/{id}");
+                    break;
+                default:
+                    Close();
+                    break;
+            }
             player.Resume();
         }
 

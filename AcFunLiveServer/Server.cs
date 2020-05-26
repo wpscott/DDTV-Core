@@ -28,6 +28,8 @@ namespace AcFunLiveServer
         private static readonly Dictionary<string, string> LOGIN_FORM = new Dictionary<string, string> { { "sid", "acfun.api.visitor" } };
         private static readonly FormUrlEncodedContent Content = new FormUrlEncodedContent(LOGIN_FORM);
 
+        public static readonly string Address = $"http://{IPAddress.Loopback}:{Port}";
+
         // Config Http Server
         static Server()
         {
@@ -100,7 +102,7 @@ namespace AcFunLiveServer
                         else
                         {
                             using var j = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
-                            if(j.RootElement.GetProperty("result").GetInt32() != 1)
+                            if (j.RootElement.GetProperty("result").GetInt32() != 1)
                             {
                                 resp.StatusCode = 404;
                                 resp.OutputStream.Write(Encoding.UTF8.GetBytes(j.RootElement.GetProperty("error_msg").GetString()));
