@@ -11,26 +11,59 @@ namespace AcFunLiveServer
 {
     public static class Server
     {
-        private const string LIVE_URL = "https://m.acfun.cn/live/detail/";
+        private const string _HOST = "https://m.acfun.cn";
+        private static readonly Uri HOST = new Uri(_HOST);
+        private const string LIVE_URL = "https://m.acfun.cn/live/detail";
         private const string LOGIN_URL = "https://id.app.acfun.cn/rest/app/visitor/login";
+        private static readonly Uri LOGIN_URI = new Uri(LOGIN_URL);
         private const string PLAY_URL = "https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=OUTSIDE_IOS_H5&userId={0}&did={1}&acfun.api.visitor_st={2}";
+
+        private const string UserAgent = "Mozilla/5.0 (iPad; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
 
         private const int Port = 62114;
         private static readonly HttpListener server;
+        private static readonly HttpClient client;
+        private static readonly CookieContainer Cookies;
 
         private static readonly Dictionary<string, string> LOGIN_FORM = new Dictionary<string, string> { { "sid", "acfun.api.visitor" } };
+        private static readonly FormUrlEncodedContent Content = new FormUrlEncodedContent(LOGIN_FORM);
 
         // Config Http Server
         static Server()
         {
             server = new HttpListener();
             server.Prefixes.Add($"http://{IPAddress.Loopback}:{Port}/");
+
+            Cookies = new CookieContainer();
+
+            client = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = Cookies });
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent); // Mobile only
         }
 
         public static async Task Start()
         {
             server.Start();
 
+            using var index = await client.GetAsync(HOST); // Get cookies for rest requests
+            if (!index.IsSuccessStatusCode)
+            {
+                Console.WriteLine(await index.Content.ReadAsStringAsync());
+                return;
+            }
+            var did = Cookies.GetCookies(HOST).Where(cookie => cookie.Name == "_did").First().Value;
+
+            using var login = await client.PostAsync(LOGIN_URI, Content); // Get user id and service token for rest requests
+            if (!login.IsSuccessStatusCode)
+            {
+                Console.WriteLine(await login.Content.ReadAsStringAsync());
+                return;
+            }
+
+            using var data = await JsonDocument.ParseAsync(await login.Content.ReadAsStreamAsync());
+            var userId = data.RootElement.GetProperty("userId").ToString();
+            var serviceToken = data.RootElement.GetProperty("acfun.api.visitor_st").ToString();
+
+            Console.WriteLine("AcFun live server is ready");
             while (true)
             {
                 var context = await server.GetContextAsync();
@@ -46,69 +79,42 @@ namespace AcFunLiveServer
                     {
                         Console.WriteLine("Found id: {0}", uid);
 
-                        var liveUri = new Uri($"{LIVE_URL}{uid}");
-                        var cookies = new CookieContainer();
-                        using var client = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = cookies, });
-                        client.DefaultRequestHeaders.UserAgent.ParseAdd("Mozilla/5.0 (iPad; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1"); // Mobile only
+                        var liveUri = new Uri($"{LIVE_URL}/{uid}");
 
-                        using var get = await client.GetAsync(liveUri);  // Get cookies used for rest requests
+                        var form = new Dictionary<string, string> { { "authorId", $"{uid}" } };
+                        using var post = new FormUrlEncodedContent(form);
+                        using var play = await client.PostAsync(  // Get stream url
+                            string.Format(
+                                PLAY_URL,
+                                userId,
+                                did,
+                                serviceToken
+                             ),
+                            post
+                            );
 
-                        if (!get.IsSuccessStatusCode)
+                        if (!play.IsSuccessStatusCode)
                         {
                             resp.StatusCode = 400;
-                            await get.Content.CopyToAsync(resp.OutputStream);
+                            await play.Content.CopyToAsync(resp.OutputStream);
                         }
                         else
                         {
-                            client.DefaultRequestHeaders.Referrer = liveUri; // Add referer to requests
-                            using var content = new FormUrlEncodedContent(LOGIN_FORM);
-                            using var post = await client.PostAsync(new Uri(LOGIN_URL), content); // Get user id and service token
-                            if (!post.IsSuccessStatusCode)
-                            {
-                                resp.StatusCode = 400;
-                                await post.Content.CopyToAsync(resp.OutputStream);
-                            }
-                            else
-                            {
-                                using var json = await JsonDocument.ParseAsync(await post.Content.ReadAsStreamAsync());
-                                var did = cookies.GetCookies(liveUri).Where(cookie => cookie.Name == "_did").FirstOrDefault();
+                            using var j = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
+                            using var res = JsonDocument.Parse(j.RootElement.GetProperty("data").GetProperty("videoPlayRes").ToString());
 
-                                var f = new Dictionary<string, string> { { "authorId", $"{uid}" } };
-                                using var ct = new FormUrlEncodedContent(f);
-                                using var play = await client.PostAsync(  // Get stream url
-                                    string.Format(
-                                        PLAY_URL,
-                                        json.RootElement.GetProperty("userId").ToString(),
-                                        did,
-                                        json.RootElement.GetProperty("acfun.api.visitor_st").ToString()
-                                     ),
-                                    ct
-                                    );
-
-                                if (!play.IsSuccessStatusCode)
-                                {
-                                    resp.StatusCode = 400;
-                                    await play.Content.CopyToAsync(resp.OutputStream);
-                                }
-                                else
-                                {
-                                    using var j = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
-                                    using var res = JsonDocument.Parse(j.RootElement.GetProperty("data").GetProperty("videoPlayRes").ToString());
-
-                                    //redirect to stream url (highest bitrate)
-                                    resp.StatusCode = 302;
-                                    resp.RedirectLocation = res.RootElement
-                                        .GetProperty("liveAdaptiveManifest")
-                                        .EnumerateArray().First()
-                                        .GetProperty("adaptationSet")
-                                        .GetProperty("representation")
-                                        .EnumerateArray()
-                                        .OrderByDescending(rep => rep.GetProperty("bitrate").GetInt32())
-                                        .First()
-                                        .GetProperty("url")
-                                        .ToString();
-                                }
-                            }
+                            //redirect to stream url (highest bitrate)
+                            resp.StatusCode = 302;
+                            resp.RedirectLocation = res.RootElement
+                                .GetProperty("liveAdaptiveManifest")
+                                .EnumerateArray().First()
+                                .GetProperty("adaptationSet")
+                                .GetProperty("representation")
+                                .EnumerateArray()
+                                .OrderByDescending(rep => rep.GetProperty("bitrate").GetInt32())
+                                .First()
+                                .GetProperty("url")
+                                .ToString();
                         }
                     }
                     else

@@ -6,9 +6,9 @@ namespace AcFunLiveServer
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("AcFun Live Server start");
+            Console.WriteLine("AcFun Live Server starting");
             Server.Start().Wait();
-            Console.WriteLine("AcFun Live Server stop");
+            Console.WriteLine("AcFun Live Server stopped");
         }
     }
 }
