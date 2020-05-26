@@ -29,10 +29,12 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1024, 576);
+            this.MinimumSize = new System.Drawing.Size(640, 360);
             this.Text = "DDTV";
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
+            //this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
         }
         #endregion
     }
