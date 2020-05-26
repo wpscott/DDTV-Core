@@ -73,7 +73,6 @@ namespace AcFunLiveServer
 
                 try
                 {
-
                     long uid;
                     if (long.TryParse(req.Url.LocalPath.Substring(1), out uid)) // Get user id
                     {
@@ -101,20 +100,28 @@ namespace AcFunLiveServer
                         else
                         {
                             using var j = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
-                            using var res = JsonDocument.Parse(j.RootElement.GetProperty("data").GetProperty("videoPlayRes").ToString());
+                            if(j.RootElement.GetProperty("result").GetInt32() != 1)
+                            {
+                                resp.StatusCode = 404;
+                                resp.OutputStream.Write(Encoding.UTF8.GetBytes(j.RootElement.GetProperty("error_msg").GetString()));
+                            }
+                            else
+                            {
+                                using var res = JsonDocument.Parse(j.RootElement.GetProperty("data").GetProperty("videoPlayRes").ToString());
 
-                            //redirect to stream url (highest bitrate)
-                            resp.StatusCode = 302;
-                            resp.RedirectLocation = res.RootElement
-                                .GetProperty("liveAdaptiveManifest")
-                                .EnumerateArray().First()
-                                .GetProperty("adaptationSet")
-                                .GetProperty("representation")
-                                .EnumerateArray()
-                                .OrderByDescending(rep => rep.GetProperty("bitrate").GetInt32())
-                                .First()
-                                .GetProperty("url")
-                                .ToString();
+                                //redirect to stream url (highest bitrate)
+                                resp.StatusCode = 302;
+                                resp.RedirectLocation = res.RootElement
+                                    .GetProperty("liveAdaptiveManifest")
+                                    .EnumerateArray().First()
+                                    .GetProperty("adaptationSet")
+                                    .GetProperty("representation")
+                                    .EnumerateArray()
+                                    .OrderByDescending(rep => rep.GetProperty("bitrate").GetInt32())
+                                    .First()
+                                    .GetProperty("url")
+                                    .ToString();
+                            }
                         }
                     }
                     else
