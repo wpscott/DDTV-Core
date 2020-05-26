@@ -2,7 +2,7 @@
   "profiles": {
     "DDTV-MPV": {
       "commandName": "Project",
-      "commandLineArgs": "21564812"
+      "commandLineArgs": "b 21564812"
     }
   }
 }

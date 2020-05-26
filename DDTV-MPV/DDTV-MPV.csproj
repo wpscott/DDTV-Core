@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\AcFunLiveServer\AcFunLiveServer.csproj" />
     <ProjectReference Include="..\BilibiliLiveServer\BilibiliLiveServer.csproj" />
   </ItemGroup>
 
