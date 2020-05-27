@@ -135,11 +135,11 @@ namespace DDTV_MPV
                         {HT_BOTTOM_LEFT, new Rectangle(0, formSize.Height - RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
                         {HT_BOTTOM, new Rectangle(RESIZE_HANDLE_SIZE, formSize.Height - RESIZE_HANDLE_SIZE, formSize.Width - 2 * RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
                         {HT_BOTTOM_RIGHT, new Rectangle(formSize.Width - RESIZE_HANDLE_SIZE, formSize.Height - RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
-                        {HT_RIGHT, new Rectangle(formSize.Width - RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, formSize.Height - 2*RESIZE_HANDLE_SIZE) },
+                        {HT_RIGHT, new Rectangle(formSize.Width - RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, formSize.Height - 2 * RESIZE_HANDLE_SIZE) },
                         {HT_TOP_RIGHT, new Rectangle(formSize.Width - RESIZE_HANDLE_SIZE, 0, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
-                        {HT_TOP, new Rectangle(RESIZE_HANDLE_SIZE, 0, formSize.Width - 2*RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
+                        {HT_TOP, new Rectangle(RESIZE_HANDLE_SIZE, 0, formSize.Width - 2 * RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
                         {HT_TOP_LEFT, new Rectangle(0, 0, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE) },
-                        {HT_LEFT, new Rectangle(0, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, formSize.Height - 2*RESIZE_HANDLE_SIZE) }
+                        {HT_LEFT, new Rectangle(0, RESIZE_HANDLE_SIZE, RESIZE_HANDLE_SIZE, formSize.Height - 2 * RESIZE_HANDLE_SIZE) }
                     };
 
                     var hitbox = boxes.Where(hitbox => hitbox.Value.Contains(clientPoint)).FirstOrDefault();
@@ -149,30 +149,30 @@ namespace DDTV_MPV
                         handled = true;
                     }
                     break;
-                //case WM_SIZING:
-                //    var rc = Marshal.PtrToStructure<Rectangle>(m.LParam);
+                    //case WM_SIZING:
+                    //    var rc = Marshal.PtrToStructure<Rectangle>(m.LParam);
 
-                //    switch (m.WParam.ToInt32())
-                //    {
-                //        case WMSZ_LEFT:
-                //        case WMSZ_RIGHT:
-                //            rc.Height = (int)(ConstantHeight * rc.Width / ConstantWidth);
-                //            break;
-                //        case WMSZ_TOP:
-                //        case WMSZ_BOTTOM:
-                //            rc.Width = (int)(ConstantWidth * rc.Height / ConstantHeight);
-                //            break;
-                //        case WMSZ_LEFT + WMSZ_TOP:
-                //        case WMSZ_RIGHT + WMSZ_TOP:
-                //            rc.Height = (int)(ConstantHeight * rc.Width / ConstantWidth);
-                //            break;
-                //        case WMSZ_LEFT + WMSZ_BOTTOM:
-                //        case WMSZ_RIGHT + WMSZ_BOTTOM:
-                //            rc.Width = (int)(ConstantWidth * rc.Height / ConstantHeight);
-                //            break;
-                //    }
-                //    Marshal.StructureToPtr(rc, m.LParam, true);
-                //    break;
+                    //    switch (m.WParam.ToInt32())
+                    //    {
+                    //        case WMSZ_LEFT:
+                    //        case WMSZ_RIGHT:
+                    //            rc.Height = (int)(ConstantHeight * rc.Width / ConstantWidth);
+                    //            break;
+                    //        case WMSZ_TOP:
+                    //        case WMSZ_BOTTOM:
+                    //            rc.Width = (int)(ConstantWidth * rc.Height / ConstantHeight);
+                    //            break;
+                    //        case WMSZ_LEFT + WMSZ_TOP:
+                    //        case WMSZ_RIGHT + WMSZ_TOP:
+                    //            rc.Height = (int)(ConstantHeight * rc.Width / ConstantWidth);
+                    //            break;
+                    //        case WMSZ_LEFT + WMSZ_BOTTOM:
+                    //        case WMSZ_RIGHT + WMSZ_BOTTOM:
+                    //            rc.Width = (int)(ConstantWidth * rc.Height / ConstantHeight);
+                    //            break;
+                    //    }
+                    //    Marshal.StructureToPtr(rc, m.LParam, true);
+                    //    break;
             }
 
             if (!handled)

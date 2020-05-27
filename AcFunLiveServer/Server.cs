@@ -73,6 +73,8 @@ namespace AcFunLiveServer
                 var req = context.Request;
                 using var resp = context.Response;
 
+                resp.ContentEncoding = Encoding.UTF8;
+
                 try
                 {
                     long uid;
@@ -104,8 +106,7 @@ namespace AcFunLiveServer
                             using var j = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
                             if (j.RootElement.GetProperty("result").GetInt32() != 1)
                             {
-                                resp.StatusCode = 404;
-                                resp.OutputStream.Write(Encoding.UTF8.GetBytes(j.RootElement.GetProperty("error_msg").GetString()));
+                                WriteContent(resp, 404, j.RootElement.GetProperty("error_msg").GetString());
                             }
                             else
                             {
@@ -135,32 +136,27 @@ namespace AcFunLiveServer
                 catch (HttpRequestException e)
                 {
                     Console.WriteLine("RequestException: {0}", e);
-                    resp.StatusCode = 500;
-                    resp.OutputStream.Write(Encoding.UTF8.GetBytes(e.Message));
+                    WriteContent(resp, 500, e.Message);
                 }
                 catch (JsonException e)
                 {
                     Console.WriteLine("JsonException: {0}", e);
-                    resp.StatusCode = 500;
-                    resp.OutputStream.Write(Encoding.UTF8.GetBytes(e.Message));
+                    WriteContent(resp, 500, e.Message);
                 }
                 catch (KeyNotFoundException e)
                 {
                     Console.WriteLine("KeyNotFoundException: {0}", e);
-                    resp.StatusCode = 500;
-                    resp.OutputStream.Write(Encoding.UTF8.GetBytes(e.Message));
+                    WriteContent(resp, 500, e.Message);
                 }
                 catch (System.IO.IOException e)
                 {
                     Console.WriteLine("IOException: {0}", e);
-                    resp.StatusCode = 500;
-                    resp.OutputStream.Write(Encoding.UTF8.GetBytes(e.Message));
+                    WriteContent(resp, 500, e.Message);
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine("Exception: {0}", e);
-                    resp.StatusCode = 500;
-                    resp.OutputStream.Write(Encoding.UTF8.GetBytes(e.Message));
+                    WriteContent(resp, 500, e.Message);
                 }
                 finally
                 {
@@ -169,6 +165,14 @@ namespace AcFunLiveServer
                     GC.Collect();
                 }
             }
+        }
+
+        internal static void WriteContent(HttpListenerResponse resp, int code, string msg)
+        {
+            resp.StatusCode = code;
+            var buffer = Encoding.UTF8.GetBytes(msg);
+            resp.ContentLength64 = buffer.Length;
+            resp.OutputStream.Write(buffer, 0, buffer.Length);
         }
     }
 }
