@@ -28,7 +28,6 @@ namespace AcFunLiveServer
         private static readonly HttpClient client;
 
         private static readonly Dictionary<string, string> LOGIN_FORM = new Dictionary<string, string> { { "sid", "acfun.api.visitor" } };
-        private static readonly FormUrlEncodedContent Content = new FormUrlEncodedContent(LOGIN_FORM);
 
         public static readonly string Address = $"http://{IPAddress.Loopback}:{Port}";
 
@@ -56,24 +55,8 @@ namespace AcFunLiveServer
         {
             server.Start();
 
-            using var index = await client.GetAsync(HOST); // Get cookies for rest requests
-            if (!index.IsSuccessStatusCode)
-            {
-                Console.WriteLine(await index.Content.ReadAsStringAsync());
-                return;
-            }
-            var devideId = Cookies.GetCookies(HOST).Where(cookie => cookie.Name == "_did").First().Value;
-
-            using var login = await client.PostAsync(LOGIN_URI, Content); // Get visitor id and service token for rest requests
-            if (!login.IsSuccessStatusCode)
-            {
-                Console.WriteLine(await login.Content.ReadAsStringAsync());
-                return;
-            }
-
-            using var loginData = await JsonDocument.ParseAsync(await login.Content.ReadAsStreamAsync());
-            var userId = loginData.RootElement.GetProperty("userId").ToString();
-            var serviceToken = loginData.RootElement.GetProperty("acfun.api.visitor_st").ToString();
+            var (deviceId, visitorId, serviceToken) = await Login();
+            if (string.IsNullOrEmpty(deviceId) || string.IsNullOrEmpty(visitorId) || string.IsNullOrEmpty(serviceToken)) { return; }
 
             Console.WriteLine("AcFun live server is ready");
             while (true)
@@ -97,8 +80,8 @@ namespace AcFunLiveServer
                         using var play = await client.PostAsync(  // Get stream url
                             string.Format(
                                 PLAY_URL,
-                                userId,
-                                devideId,
+                                visitorId,
+                                deviceId,
                                 serviceToken
                              ),
                             post
@@ -153,6 +136,31 @@ namespace AcFunLiveServer
                     GC.Collect();
                 }
             }
+        }
+
+        internal static async Task<(string, string, string)> Login()
+        {
+            using var index = await client.GetAsync(HOST); // Get cookies for rest requests
+            if (!index.IsSuccessStatusCode)
+            {
+                Console.WriteLine(await index.Content.ReadAsStringAsync());
+                return (null, null, null);
+            }
+            var deviceId = Cookies.GetCookies(HOST).Where(cookie => cookie.Name == "_did").First().Value;
+
+            using var loginContent = new FormUrlEncodedContent(LOGIN_FORM);
+            using var login = await client.PostAsync(LOGIN_URI, loginContent); // Get visitor id and service token for rest requests
+            if (!login.IsSuccessStatusCode)
+            {
+                Console.WriteLine(await login.Content.ReadAsStringAsync());
+                return (null, null, null);
+            }
+
+            using var loginData = await JsonDocument.ParseAsync(await login.Content.ReadAsStreamAsync());
+            var userId = loginData.RootElement.GetProperty("userId").ToString();
+            var serviceToken = loginData.RootElement.GetProperty("acfun.api.visitor_st").ToString();
+
+            return (deviceId, userId, serviceToken);
         }
 
         internal static void WriteContent(HttpListenerResponse resp, Exception e)
