@@ -5,7 +5,7 @@ DDTV-Core是用C# 和 .Net Core 3.1编写的AcFun/BiliBili直播播放工具。
 **不提供32位程序。**
 
 ## AcFunLiveServer
-AcFunLiveServer是一个简单的控制台项目用于获取AcFun的直播视频流。**适合DD及单推**
+AcFunLiveServer是一个简单的控制台项目用于获取AcFun的直播视频流。
 ### 使用方式
 1. 编译
 2. 运行ACFunLiveServer.exe。请确保62114端口没有被使用。
@@ -13,7 +13,7 @@ AcFunLiveServer是一个简单的控制台项目用于获取AcFun的直播视频
 4. 观看直播
 
 ## BilibiliLiveServer
-BiliBiliLiveServer是一个简单的控制台项目用于转发BiliBili的直播视频流。**适合DD及单推**
+BiliBiliLiveServer是一个简单的控制台项目用于转发BiliBili的直播视频流。
 ### 使用方式
 1. 编译
 2. 运行BiliBIliLiveServer.exe。请确保29119端口没有被使用。
@@ -24,14 +24,14 @@ BiliBiliLiveServer是一个简单的控制台项目用于转发BiliBili的直播
 *GPU占用高是因为[Wallpaper Engine](https://www.wallpaperengine.io/)*
 
 ## DDTV-FFmpeg
-基于WPF和[ffmediaelement](https://github.com/unosquare/ffmediaelement)的BiliBili直播播放器。**适合DD** （**该播放器占用较高**）
+基于WPF和[ffmediaelement](https://github.com/unosquare/ffmediaelement)的BiliBili直播播放器。（**该播放器占用较高**）
 ### 使用方式
 1. 编译
 2. 运行DDTV-FFmpeg.exe 房间号（如：12235923）
 3. 观看直播
 
 ## DDTV-MPV
-基于WinForms和[MPV.Net](https://github.com/hudec117/Mpv.NET-lib-)的BiliBili的直播播放器，使用AcFunLiveServer/BilibiliLiveServer作为直播源。**适合DD及单推**
+基于WinForms和[MPV.Net](https://github.com/hudec117/Mpv.NET-lib-)的BiliBili的直播播放器，使用AcFunLiveServer/BilibiliLiveServer作为直播源。
 ### 使用方式
 1. 编译
 2. 运行ACFunLiveServer.exe（请确保62114端口没有被使用）或BilibiliLiveServer.exe（请确保29119端口没有被使用）
