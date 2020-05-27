@@ -21,9 +21,11 @@ namespace AcFunLiveServer
         private const string UserAgent = "Mozilla/5.0 (iPad; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
 
         private const int Port = 62114;
+        private static readonly Encoding Encoding = Encoding.UTF8;
         private static readonly HttpListener server;
-        private static readonly HttpClient client;
+
         private static readonly CookieContainer Cookies;
+        private static readonly HttpClient client;
 
         private static readonly Dictionary<string, string> LOGIN_FORM = new Dictionary<string, string> { { "sid", "acfun.api.visitor" } };
         private static readonly FormUrlEncodedContent Content = new FormUrlEncodedContent(LOGIN_FORM);
@@ -34,12 +36,20 @@ namespace AcFunLiveServer
         static Server()
         {
             server = new HttpListener();
-            server.Prefixes.Add($"http://{IPAddress.Loopback}:{Port}/");
+            server.Prefixes.Add($"{Address}/");
 
             Cookies = new CookieContainer();
 
-            client = new HttpClient(new HttpClientHandler { UseCookies = true, CookieContainer = Cookies });
+            client = new HttpClient(
+                new HttpClientHandler
+                {
+                    AutomaticDecompression = DecompressionMethods.All,
+                    UseCookies = true,
+                    CookieContainer = Cookies
+                }
+            );
             client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent); // Mobile only
+            client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
         }
 
         public static async Task Start()
@@ -52,18 +62,18 @@ namespace AcFunLiveServer
                 Console.WriteLine(await index.Content.ReadAsStringAsync());
                 return;
             }
-            var did = Cookies.GetCookies(HOST).Where(cookie => cookie.Name == "_did").First().Value;
+            var devideId = Cookies.GetCookies(HOST).Where(cookie => cookie.Name == "_did").First().Value;
 
-            using var login = await client.PostAsync(LOGIN_URI, Content); // Get user id and service token for rest requests
+            using var login = await client.PostAsync(LOGIN_URI, Content); // Get visitor id and service token for rest requests
             if (!login.IsSuccessStatusCode)
             {
                 Console.WriteLine(await login.Content.ReadAsStringAsync());
                 return;
             }
 
-            using var data = await JsonDocument.ParseAsync(await login.Content.ReadAsStreamAsync());
-            var userId = data.RootElement.GetProperty("userId").ToString();
-            var serviceToken = data.RootElement.GetProperty("acfun.api.visitor_st").ToString();
+            using var loginData = await JsonDocument.ParseAsync(await login.Content.ReadAsStreamAsync());
+            var userId = loginData.RootElement.GetProperty("userId").ToString();
+            var serviceToken = loginData.RootElement.GetProperty("acfun.api.visitor_st").ToString();
 
             Console.WriteLine("AcFun live server is ready");
             while (true)
@@ -73,14 +83,12 @@ namespace AcFunLiveServer
                 var req = context.Request;
                 using var resp = context.Response;
 
-                resp.ContentEncoding = Encoding.UTF8;
-
                 try
                 {
-                    long uid;
-                    if (long.TryParse(req.Url.LocalPath.Substring(1), out uid)) // Get user id
+                    var path = req.Url.LocalPath.Substring(1);
+                    if (long.TryParse(path, out var uid)) // Get user id
                     {
-                        Console.WriteLine("Found id: {0}", uid);
+                        Console.WriteLine("Found user id: {0}", uid);
 
                         var liveUri = new Uri($"{LIVE_URL}/{uid}");
 
@@ -90,7 +98,7 @@ namespace AcFunLiveServer
                             string.Format(
                                 PLAY_URL,
                                 userId,
-                                did,
+                                devideId,
                                 serviceToken
                              ),
                             post
@@ -98,23 +106,27 @@ namespace AcFunLiveServer
 
                         if (!play.IsSuccessStatusCode)
                         {
-                            resp.StatusCode = 400;
-                            await play.Content.CopyToAsync(resp.OutputStream);
+                            WriteContent(uid, resp, 400, await play.Content.ReadAsStringAsync());
                         }
                         else
                         {
-                            using var j = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
-                            if (j.RootElement.GetProperty("result").GetInt32() != 1)
+                            using var playData = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
+                            if (playData.RootElement.GetProperty("result").GetInt32() != 1)
                             {
-                                WriteContent(resp, 404, j.RootElement.GetProperty("error_msg").GetString());
+                                WriteContent(uid, resp, 404, playData.RootElement.GetProperty("error_msg").GetString());
                             }
                             else
                             {
-                                using var res = JsonDocument.Parse(j.RootElement.GetProperty("data").GetProperty("videoPlayRes").ToString());
+                                using var playRes = JsonDocument.Parse(
+                                    playData.RootElement
+                                    .GetProperty("data")
+                                    .GetProperty("videoPlayRes")
+                                    .ToString()
+                                    );
 
                                 //redirect to stream url (highest bitrate)
                                 resp.StatusCode = 302;
-                                resp.RedirectLocation = res.RootElement
+                                resp.RedirectLocation = playRes.RootElement
                                     .GetProperty("liveAdaptiveManifest")
                                     .EnumerateArray().First()
                                     .GetProperty("adaptationSet")
@@ -127,37 +139,13 @@ namespace AcFunLiveServer
                             }
                         }
                     }
-                    else
-                    {
-                        resp.StatusCode = 400;
-                        await resp.OutputStream.WriteAsync(Encoding.UTF8.GetBytes("Invalid Request"));
-                    }
+                    else { WriteContent(uid, resp, 400, $"Invalid Request: {path}"); }
                 }
-                catch (HttpRequestException e)
-                {
-                    Console.WriteLine("RequestException: {0}", e);
-                    WriteContent(resp, 500, e.Message);
-                }
-                catch (JsonException e)
-                {
-                    Console.WriteLine("JsonException: {0}", e);
-                    WriteContent(resp, 500, e.Message);
-                }
-                catch (KeyNotFoundException e)
-                {
-                    Console.WriteLine("KeyNotFoundException: {0}", e);
-                    WriteContent(resp, 500, e.Message);
-                }
-                catch (System.IO.IOException e)
-                {
-                    Console.WriteLine("IOException: {0}", e);
-                    WriteContent(resp, 500, e.Message);
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Exception: {0}", e);
-                    WriteContent(resp, 500, e.Message);
-                }
+                catch (HttpRequestException e) { WriteContent(resp, e); }
+                catch (JsonException e) { WriteContent(resp, e); }
+                catch (KeyNotFoundException e) { WriteContent(resp, e); }
+                catch (System.IO.IOException e) { WriteContent(resp, e); }
+                catch (Exception e) { WriteContent(resp, e); }
                 finally
                 {
                     resp.Close();
@@ -167,10 +155,24 @@ namespace AcFunLiveServer
             }
         }
 
+        internal static void WriteContent(HttpListenerResponse resp, Exception e)
+        {
+            Console.WriteLine("Unhandled Exception: {0}", e);
+            WriteContent(resp, 500, e.Message);
+        }
+
+        internal static void WriteContent(long uid, HttpListenerResponse resp, int code, string msg)
+        {
+            Console.WriteLine("Id: {0} not available, reason: {1}", uid, msg);
+            WriteContent(resp, code, msg);
+        }
+
         internal static void WriteContent(HttpListenerResponse resp, int code, string msg)
         {
+            resp.ContentEncoding = Encoding;
+
             resp.StatusCode = code;
-            var buffer = Encoding.UTF8.GetBytes(msg);
+            var buffer = Encoding.GetBytes(msg);
             resp.ContentLength64 = buffer.Length;
             resp.OutputStream.Write(buffer, 0, buffer.Length);
         }
