@@ -35,5 +35,6 @@ BiliBiliLiveServer是一个简单的控制台项目用于转发BiliBili的直播
 ### 使用方式
 1. 编译
 2. 运行ACFunLiveServer.exe（请确保62114端口没有被使用）或BilibiliLiveServer.exe（请确保29119端口没有被使用）
-3. 运行DDTV-MPV.exe 平台（a/ac/acfun/b/bili/bilibili） 房间号（如：12235923）
+3. 运行DDTV-MPV.exe 平台（a/ac/acfun/b/bili/bilibili） A站用户ID（如：69065、23682490或156843）/B站房间号（如：12235923）
+例子：`DDTV-MPV.exe a 69065` `DDTV-MPV.exe b 12235923`
 4. 观看直播
