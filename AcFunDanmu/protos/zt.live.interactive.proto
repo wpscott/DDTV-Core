@@ -1,0 +1,157 @@
+﻿syntax = "proto3";
+
+message ZtLiveCsCmd {
+	string cmdType = 1;
+	bytes payload = 2;
+	string ticket = 3;
+	string liveId = 4;
+}
+
+message ZtLiveCsCmdAck {
+	string cmdAckType = 1;
+	int64 errorCode = 2;
+	string errorMsg = 3;
+	bytes payload =4;
+}
+
+message ZtLiveCsEnterRoom {
+	bool isAuthor = 1;
+	int32 reconnectCount = 2;
+	int32 lastErrorCode = 3;
+	string enterRoomAttach = 4;
+	string clientLiveSdkVersion =5;
+}
+
+message ZtLiveCsEnterRoomAck {
+	int64 heartbeatIntervalMs = 1;
+}
+
+message ZtLiveCsUserExit {}
+
+message ZtLiveCsUserExitAck {}
+
+message ZtLiveCsHeartbeat {
+	int64 clientTimestampMs = 1;
+	int64 sequence = 2;
+}
+
+message ZtLiveCsHeartbeatAck {
+	int64 serverTimestampMs = 1;
+	int64 clientTimestampMs = 2;
+	int64 clientSequence = 3;
+}
+
+message ZtLiveScMessage {
+	string messageType = 1;
+	CompressionType compressionType = 2;
+	bytes payload = 3;
+	string liveId = 4;
+	string ticket = 5;
+	int64 serverTimestampMs = 6;
+
+	enum CompressionType {
+		UNKNOWN = 0;
+		NONE = 1;
+		GZIP = 2;
+	}
+}
+
+message ZtLiveActionSignalItem {
+	string singalType = 1;
+	repeated bytes payload = 2;
+}
+
+message ZtLiveStateSignalItem {
+	string singalType = 1;
+	bytes payload = 2;
+}
+
+message ZtLiveScStateSignal {
+	repeated ZtLiveStateSignalItem item = 1;
+}
+
+message ZtLiveNotifySignalItem {
+	string signalType = 1;
+	bytes payload = 2;
+}
+
+message ZtLiveScNotifySignal {
+	repeated ZtLiveNotifySignalItem item = 1;
+}
+
+message ZtLiveScStatusChanged {
+	Type type = 1;
+	int64 maxRandomDelayMs = 2;
+	BannedInfo bannedInfo = 3;
+
+	enum Type {
+		UNKNOWN = 0;
+		LIVE_CLOSED = 1;
+		LIVE_REOPENED = 2;
+		LIVE_URL_CHANGED = 3;
+		LIVE_BANNED = 4;
+	}
+
+	message BannedInfo {
+		string banReason = 1;
+	}
+}
+
+message ZtLiveScTicketInvalid {}
+
+message ZtUserInfo {
+	int64 userId = 1;
+	string nickname = 2;
+}
+
+message CommonActionSignalComment {
+	string content = 1;
+	int64 sendTimeMs = 2;
+	ZtUserInfo userInfo = 3;
+}
+
+message CommonActionSignalLike {
+	ZtUserInfo userInfo = 1;
+	int64 sendTimeMs = 2;
+}
+
+message CommonActionSignalUserEnterRoom {
+	ZtUserInfo userInfo = 1;
+	int64 sendTimeMs = 2;
+}
+
+message CommonActionSignalUserFollowAuthor {
+	ZtUserInfo userInfo = 1;
+	int64 sendTimeMs = 2;
+}
+
+message CommonNotifySignalKickedOut {
+	string reason = 1;
+}
+
+message CommonNotifySignalViolationAlert {
+	string violationContent = 1;
+}
+
+message CommonStateSignalDisplayInfo {
+	string watchingCount = 1;
+	string likeCount = 2;
+}
+
+enum CsAckErrorCode {
+	SUCCESS_CS_ACK = 0;
+	LIVE_CLOSED = 1;
+	TICKET_ILLEGAL = 2;
+	ATTACH_ILLEGAL =3;
+	USER_NOT_IN_ROOM = 4;
+	SERVER_ERROR = 5;
+	REQUEST_PARAM_INVALID = 6;
+	ROOM_NOT_EXIST_IN_STATE_MANAGER = 7;
+}
+
+enum ZtLiveDownstreamPayloadErrorCode {
+	SUCCESS_DOWNSTREAM_PAYLOAD = 0;
+	CS_CMD_PARSE_ERROR = 100001;
+	CS_CMD_CMD_NOT_SUPPORT = 100002;
+	CS_CMD_TICKET_ILLEGAL = 100003;
+}

@@ -1,0 +1,6 @@
+﻿syntax = "proto3";
+
+message SettingInfo {
+	string locale = 1;
+	sint32 timezone = 2;
+}

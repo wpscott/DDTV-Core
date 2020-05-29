@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace DDTV_MPV
@@ -16,8 +13,6 @@ namespace DDTV_MPV
         {
             if (args.Length == 2)
             {
-                //Task.Run(async () => await BilibiliLiveServer.Server.Start());
-
                 Application.SetHighDpiMode(HighDpiMode.SystemAware);
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);

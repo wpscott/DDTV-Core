@@ -1,0 +1,6 @@
+﻿syntax = "proto3";
+
+message FrontendInfo {
+    string ip = 1;
+    int32 port = 2;
+}

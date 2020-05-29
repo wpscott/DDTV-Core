@@ -27,6 +27,9 @@ namespace DDTV_MPV
                 Volume = 50,
             };
 
+            player.MediaFinished += (s, e) => Close();
+            player.MediaError += (s, e) => Close();
+
             Load += Form1_Load;
             FormClosing += Form1_FormClosing;
             MouseDown += Form1_MouseDown;
