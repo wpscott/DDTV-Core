@@ -37,7 +37,7 @@ namespace AcFunDanmu
                                 {
                                     var pi = Client.Parse(item.SingalType, p);
 #if DEBUG
-                                    Console.WriteLine(pi);
+                                    Console.WriteLine("Type: {0}, content: {1}", item.SingalType, pi);
 #endif
                                 }
                             }
@@ -49,7 +49,7 @@ namespace AcFunDanmu
                             {
                                 var pi = Client.Parse(item.SingalType, item.Payload);
 #if DEBUG
-                                Console.WriteLine(pi);
+                                Console.WriteLine("Type: {0}, content: {1}", item.SingalType, pi);
 #endif
                             }
                             break;
