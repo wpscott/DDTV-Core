@@ -13,7 +13,7 @@ Source: [mplayer.js](https://cdnfile.aixifan.com/static/@ks/mplayer.5d57772120f8
 
 ## AcFun直播websocket流程
 
-0. 发送Ajax POST请求`https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=OUTSIDE_ANDROID_H5&userId=[用户Id]&did=[DeviceId]&acfun.api.visitor_st=[ServiceToken]`，表单数据为`authorId=[播主Id]`获取`liveId`和`enterRoomAttach`
+0. 发送Ajax POST请求`https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=OUTSIDE_ANDROID_H5&userId=[用户Id]&did=[DeviceId]&acfun.api.visitor_st=[ServiceToken]`，表单数据为`authorId=[播主Id]`获取`availableTickets`、`liveId`和`enterRoomAttach`
 1. 建立websocket链接`wss://link.xiatou.com/`
 2. 发送RegisterRequest
 3. 接收RegisterResponse，获取SessionKey
