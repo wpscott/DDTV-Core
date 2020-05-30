@@ -18,7 +18,7 @@ message RegisterRequest {
 	PushServiceToken pushServiceToken = 7;
 	int64 instanceId = 8;
 	repeated PushServiceToken pushServiceTokenList = 9;
-	int32 keepaliceIntervalSec = 10;
+	int32 keepaliveIntervalSec = 10;
 	ZtCommonInfo ztCommonInfo = 11;
 
 	enum PresenceStatus {

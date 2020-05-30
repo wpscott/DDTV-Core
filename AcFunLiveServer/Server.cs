@@ -73,8 +73,6 @@ namespace AcFunLiveServer
                     {
                         Console.WriteLine("Found user id: {0}", uid);
 
-                        var liveUri = new Uri($"{LIVE_URL}/{uid}");
-
                         var form = new Dictionary<string, string> { { "authorId", $"{uid}" } };
                         using var post = new FormUrlEncodedContent(form);
                         using var play = await client.PostAsync(  // Get stream url
