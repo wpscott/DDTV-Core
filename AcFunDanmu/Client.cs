@@ -566,9 +566,19 @@ namespace AcFunDanmu
 
             PacketHeader header = DecodeHeader(bytes, headerLength);
 
-            var key = header.EncryptionMode == PacketHeader.Types.EncryptionMode.KEncryptionServiceToken ? SecurityKey : SessionKey;
+            byte[] payload;
+            if(header.EncryptionMode != PacketHeader.Types.EncryptionMode.KEncryptionNone)
+            {
+                var key = header.EncryptionMode == PacketHeader.Types.EncryptionMode.KEncryptionServiceToken ? SecurityKey : SessionKey;
 
-            var payload = Decrypt(bytes, headerLength, payloadLength, key);
+                payload = Decrypt(bytes, headerLength, payloadLength, key);
+            }
+            else
+            {
+                payload = new byte[payloadLength];
+                Array.Copy(bytes, Offset + headerLength, payload, 0, payloadLength);
+            }
+
 
             if (payload.Length != header.DecodedPayloadLen)
             {
