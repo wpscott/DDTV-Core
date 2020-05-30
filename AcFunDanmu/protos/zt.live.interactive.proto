@@ -191,10 +191,10 @@ message CommonStateSignalRecentComment {
 message CommonActionSignalGift {
 	AcUserInfo.Detail user = 1;
 	int64 sendTimeMs = 2;
-	int32 number1 = 3;
-	int32 number2 = 4;
-	int32 number3 = 5;
-	int32 number4 = 6;
+	int32 itemId = 3;
+	int32 count = 4;
+	int32 combo = 5;
+	int32 value = 6;
 	string uuid = 7;
 	int32 number5 = 8;
 	int32 number6 = 9;

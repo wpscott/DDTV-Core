@@ -76,20 +76,19 @@ public static partial class ZtLiveInteractiveReflection {
           "DAoEdXJsMRgCIAEoCRIMCgR1cmwyGAMgASgJIjYKGUNvbW1vblN0YXRlU2ln",
           "bmFsVG9wVXNlcnMSGQoEdXNlchgBIAMoCzILLkFjVXNlckluZm8iTQoeQ29t",
           "bW9uU3RhdGVTaWduYWxSZWNlbnRDb21tZW50EisKB2NvbW1lbnQYASADKAsy",
-          "Gi5Db21tb25BY3Rpb25TaWduYWxDb21tZW50IsIBChZDb21tb25BY3Rpb25T",
+          "Gi5Db21tb25BY3Rpb25TaWduYWxDb21tZW50IrsBChZDb21tb25BY3Rpb25T",
           "aWduYWxHaWZ0EiAKBHVzZXIYASABKAsyEi5BY1VzZXJJbmZvLkRldGFpbBIS",
-          "CgpzZW5kVGltZU1zGAIgASgDEg8KB251bWJlcjEYAyABKAUSDwoHbnVtYmVy",
-          "MhgEIAEoBRIPCgdudW1iZXIzGAUgASgFEg8KB251bWJlcjQYBiABKAUSDAoE",
-          "dXVpZBgHIAEoCRIPCgdudW1iZXI1GAggASgFEg8KB251bWJlcjYYCSABKAUq",
-          "xQEKDkNzQWNrRXJyb3JDb2RlEhIKDlNVQ0NFU1NfQ1NfQUNLEAASDwoLTElW",
-          "RV9DTE9TRUQQARISCg5USUNLRVRfSUxMRUdBTBACEhIKDkFUVEFDSF9JTExF",
-          "R0FMEAMSFAoQVVNFUl9OT1RfSU5fUk9PTRAEEhAKDFNFUlZFUl9FUlJPUhAF",
-          "EhkKFVJFUVVFU1RfUEFSQU1fSU5WQUxJRBAGEiMKH1JPT01fTk9UX0VYSVNU",
-          "X0lOX1NUQVRFX01BTkFHRVIQByqXAQogWnRMaXZlRG93bnN0cmVhbVBheWxv",
-          "YWRFcnJvckNvZGUSHgoaU1VDQ0VTU19ET1dOU1RSRUFNX1BBWUxPQUQQABIY",
-          "ChJDU19DTURfUEFSU0VfRVJST1IQoY0GEhwKFkNTX0NNRF9DTURfTk9UX1NV",
-          "UFBPUlQQoo0GEhsKFUNTX0NNRF9USUNLRVRfSUxMRUdBTBCjjQZiBnByb3Rv",
-          "Mw=="));
+          "CgpzZW5kVGltZU1zGAIgASgDEg4KBml0ZW1JZBgDIAEoBRINCgVjb3VudBgE",
+          "IAEoBRINCgVjb21ibxgFIAEoBRINCgV2YWx1ZRgGIAEoBRIMCgR1dWlkGAcg",
+          "ASgJEg8KB251bWJlcjUYCCABKAUSDwoHbnVtYmVyNhgJIAEoBSrFAQoOQ3NB",
+          "Y2tFcnJvckNvZGUSEgoOU1VDQ0VTU19DU19BQ0sQABIPCgtMSVZFX0NMT1NF",
+          "RBABEhIKDlRJQ0tFVF9JTExFR0FMEAISEgoOQVRUQUNIX0lMTEVHQUwQAxIU",
+          "ChBVU0VSX05PVF9JTl9ST09NEAQSEAoMU0VSVkVSX0VSUk9SEAUSGQoVUkVR",
+          "VUVTVF9QQVJBTV9JTlZBTElEEAYSIwofUk9PTV9OT1RfRVhJU1RfSU5fU1RB",
+          "VEVfTUFOQUdFUhAHKpcBCiBadExpdmVEb3duc3RyZWFtUGF5bG9hZEVycm9y",
+          "Q29kZRIeChpTVUNDRVNTX0RPV05TVFJFQU1fUEFZTE9BRBAAEhgKEkNTX0NN",
+          "RF9QQVJTRV9FUlJPUhChjQYSHAoWQ1NfQ01EX0NNRF9OT1RfU1VQUE9SVBCi",
+          "jQYSGwoVQ1NfQ01EX1RJQ0tFVF9JTExFR0FMEKONBmIGcHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(new[] {typeof(global::CsAckErrorCode), typeof(global::ZtLiveDownstreamPayloadErrorCode), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -121,7 +120,7 @@ public static partial class ZtLiveInteractiveReflection {
           new pbr::GeneratedClrTypeInfo(typeof(global::AcUserInfo), global::AcUserInfo.Parser, new[]{ "Detail", "UserInfoJson", "Unknown" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::AcUserInfo.Types.Detail), global::AcUserInfo.Types.Detail.Parser, new[]{ "UserId", "Name", "Avator" }, null, null, null, new pbr::GeneratedClrTypeInfo[] { new pbr::GeneratedClrTypeInfo(typeof(global::AcUserInfo.Types.Detail.Types.Avatar), global::AcUserInfo.Types.Detail.Types.Avatar.Parser, new[]{ "Unknown", "Url1", "Url2" }, null, null, null, null)})}),
           new pbr::GeneratedClrTypeInfo(typeof(global::CommonStateSignalTopUsers), global::CommonStateSignalTopUsers.Parser, new[]{ "User" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::CommonStateSignalRecentComment), global::CommonStateSignalRecentComment.Parser, new[]{ "Comment" }, null, null, null, null),
-          new pbr::GeneratedClrTypeInfo(typeof(global::CommonActionSignalGift), global::CommonActionSignalGift.Parser, new[]{ "User", "SendTimeMs", "Number1", "Number2", "Number3", "Number4", "Uuid", "Number5", "Number6" }, null, null, null, null)
+          new pbr::GeneratedClrTypeInfo(typeof(global::CommonActionSignalGift), global::CommonActionSignalGift.Parser, new[]{ "User", "SendTimeMs", "ItemId", "Count", "Combo", "Value", "Uuid", "Number5", "Number6" }, null, null, null, null)
         }));
   }
   #endregion
@@ -5135,10 +5134,10 @@ public sealed partial class CommonActionSignalGift : pb::IMessage<CommonActionSi
   public CommonActionSignalGift(CommonActionSignalGift other) : this() {
     user_ = other.user_ != null ? other.user_.Clone() : null;
     sendTimeMs_ = other.sendTimeMs_;
-    number1_ = other.number1_;
-    number2_ = other.number2_;
-    number3_ = other.number3_;
-    number4_ = other.number4_;
+    itemId_ = other.itemId_;
+    count_ = other.count_;
+    combo_ = other.combo_;
+    value_ = other.value_;
     uuid_ = other.uuid_;
     number5_ = other.number5_;
     number6_ = other.number6_;
@@ -5172,47 +5171,47 @@ public sealed partial class CommonActionSignalGift : pb::IMessage<CommonActionSi
     }
   }
 
-  /// <summary>Field number for the "number1" field.</summary>
-  public const int Number1FieldNumber = 3;
-  private int number1_;
+  /// <summary>Field number for the "itemId" field.</summary>
+  public const int ItemIdFieldNumber = 3;
+  private int itemId_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Number1 {
-    get { return number1_; }
+  public int ItemId {
+    get { return itemId_; }
     set {
-      number1_ = value;
+      itemId_ = value;
     }
   }
 
-  /// <summary>Field number for the "number2" field.</summary>
-  public const int Number2FieldNumber = 4;
-  private int number2_;
+  /// <summary>Field number for the "count" field.</summary>
+  public const int CountFieldNumber = 4;
+  private int count_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Number2 {
-    get { return number2_; }
+  public int Count {
+    get { return count_; }
     set {
-      number2_ = value;
+      count_ = value;
     }
   }
 
-  /// <summary>Field number for the "number3" field.</summary>
-  public const int Number3FieldNumber = 5;
-  private int number3_;
+  /// <summary>Field number for the "combo" field.</summary>
+  public const int ComboFieldNumber = 5;
+  private int combo_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Number3 {
-    get { return number3_; }
+  public int Combo {
+    get { return combo_; }
     set {
-      number3_ = value;
+      combo_ = value;
     }
   }
 
-  /// <summary>Field number for the "number4" field.</summary>
-  public const int Number4FieldNumber = 6;
-  private int number4_;
+  /// <summary>Field number for the "value" field.</summary>
+  public const int ValueFieldNumber = 6;
+  private int value_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public int Number4 {
-    get { return number4_; }
+  public int Value {
+    get { return value_; }
     set {
-      number4_ = value;
+      value_ = value;
     }
   }
 
@@ -5264,10 +5263,10 @@ public sealed partial class CommonActionSignalGift : pb::IMessage<CommonActionSi
     }
     if (!object.Equals(User, other.User)) return false;
     if (SendTimeMs != other.SendTimeMs) return false;
-    if (Number1 != other.Number1) return false;
-    if (Number2 != other.Number2) return false;
-    if (Number3 != other.Number3) return false;
-    if (Number4 != other.Number4) return false;
+    if (ItemId != other.ItemId) return false;
+    if (Count != other.Count) return false;
+    if (Combo != other.Combo) return false;
+    if (Value != other.Value) return false;
     if (Uuid != other.Uuid) return false;
     if (Number5 != other.Number5) return false;
     if (Number6 != other.Number6) return false;
@@ -5279,10 +5278,10 @@ public sealed partial class CommonActionSignalGift : pb::IMessage<CommonActionSi
     int hash = 1;
     if (user_ != null) hash ^= User.GetHashCode();
     if (SendTimeMs != 0L) hash ^= SendTimeMs.GetHashCode();
-    if (Number1 != 0) hash ^= Number1.GetHashCode();
-    if (Number2 != 0) hash ^= Number2.GetHashCode();
-    if (Number3 != 0) hash ^= Number3.GetHashCode();
-    if (Number4 != 0) hash ^= Number4.GetHashCode();
+    if (ItemId != 0) hash ^= ItemId.GetHashCode();
+    if (Count != 0) hash ^= Count.GetHashCode();
+    if (Combo != 0) hash ^= Combo.GetHashCode();
+    if (Value != 0) hash ^= Value.GetHashCode();
     if (Uuid.Length != 0) hash ^= Uuid.GetHashCode();
     if (Number5 != 0) hash ^= Number5.GetHashCode();
     if (Number6 != 0) hash ^= Number6.GetHashCode();
@@ -5307,21 +5306,21 @@ public sealed partial class CommonActionSignalGift : pb::IMessage<CommonActionSi
       output.WriteRawTag(16);
       output.WriteInt64(SendTimeMs);
     }
-    if (Number1 != 0) {
+    if (ItemId != 0) {
       output.WriteRawTag(24);
-      output.WriteInt32(Number1);
+      output.WriteInt32(ItemId);
     }
-    if (Number2 != 0) {
+    if (Count != 0) {
       output.WriteRawTag(32);
-      output.WriteInt32(Number2);
+      output.WriteInt32(Count);
     }
-    if (Number3 != 0) {
+    if (Combo != 0) {
       output.WriteRawTag(40);
-      output.WriteInt32(Number3);
+      output.WriteInt32(Combo);
     }
-    if (Number4 != 0) {
+    if (Value != 0) {
       output.WriteRawTag(48);
-      output.WriteInt32(Number4);
+      output.WriteInt32(Value);
     }
     if (Uuid.Length != 0) {
       output.WriteRawTag(58);
@@ -5349,17 +5348,17 @@ public sealed partial class CommonActionSignalGift : pb::IMessage<CommonActionSi
     if (SendTimeMs != 0L) {
       size += 1 + pb::CodedOutputStream.ComputeInt64Size(SendTimeMs);
     }
-    if (Number1 != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Number1);
+    if (ItemId != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeInt32Size(ItemId);
     }
-    if (Number2 != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Number2);
+    if (Count != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Count);
     }
-    if (Number3 != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Number3);
+    if (Combo != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Combo);
     }
-    if (Number4 != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Number4);
+    if (Value != 0) {
+      size += 1 + pb::CodedOutputStream.ComputeInt32Size(Value);
     }
     if (Uuid.Length != 0) {
       size += 1 + pb::CodedOutputStream.ComputeStringSize(Uuid);
@@ -5390,17 +5389,17 @@ public sealed partial class CommonActionSignalGift : pb::IMessage<CommonActionSi
     if (other.SendTimeMs != 0L) {
       SendTimeMs = other.SendTimeMs;
     }
-    if (other.Number1 != 0) {
-      Number1 = other.Number1;
+    if (other.ItemId != 0) {
+      ItemId = other.ItemId;
     }
-    if (other.Number2 != 0) {
-      Number2 = other.Number2;
+    if (other.Count != 0) {
+      Count = other.Count;
     }
-    if (other.Number3 != 0) {
-      Number3 = other.Number3;
+    if (other.Combo != 0) {
+      Combo = other.Combo;
     }
-    if (other.Number4 != 0) {
-      Number4 = other.Number4;
+    if (other.Value != 0) {
+      Value = other.Value;
     }
     if (other.Uuid.Length != 0) {
       Uuid = other.Uuid;
@@ -5434,19 +5433,19 @@ public sealed partial class CommonActionSignalGift : pb::IMessage<CommonActionSi
           break;
         }
         case 24: {
-          Number1 = input.ReadInt32();
+          ItemId = input.ReadInt32();
           break;
         }
         case 32: {
-          Number2 = input.ReadInt32();
+          Count = input.ReadInt32();
           break;
         }
         case 40: {
-          Number3 = input.ReadInt32();
+          Combo = input.ReadInt32();
           break;
         }
         case 48: {
-          Number4 = input.ReadInt32();
+          Value = input.ReadInt32();
           break;
         }
         case 58: {

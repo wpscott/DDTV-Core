@@ -21,7 +21,7 @@ namespace AcFunDanmu
         {
             switch (stream.Command)
             {
-                // Includes comment, gift, enter room, like
+                // Includes comment, gift, enter room, like, follower
                 case "Push.ZtLiveInteractive.Message":
                     ZtLiveScMessage message = ZtLiveScMessage.Parser.ParseFrom(stream.PayloadData);
 
@@ -80,7 +80,7 @@ namespace AcFunDanmu
                                             var gift = CommonActionSignalGift.Parser.ParseFrom(pl);
                                             Console.WriteLine("{0} - {1}({2}) sent gift", gift.SendTimeMs, gift.User.Name, gift.User.UserId);
 #if DEBUG
-                                            Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}", gift.Number1, gift.Number2, gift.Number3, gift.Number4, gift.Number5, gift.Number6);
+                                            Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}", gift.ItemId, gift.Count, gift.Combo, gift.Value, gift.Number5, gift.Number6);
 #endif
                                         }
                                         break;
