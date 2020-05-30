@@ -32,7 +32,7 @@ namespace AcFunDanmu
         const string _Host = "wss://link.xiatou.com/";
         static readonly Uri Host = new Uri(_Host);
         const int Offset = 12;
-        const int BufferSize = 2 << 16;
+        const int BufferSize = 1 << 16;
         const int AppId = 13;
         const string AppName = "link-sdk";
         const string SdkVersion = "1.2.1";
