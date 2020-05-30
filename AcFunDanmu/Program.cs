@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace AcFunDanmu
 {
@@ -6,7 +7,7 @@ namespace AcFunDanmu
     {
         static void Main(string[] args)
         {
-            if(args.Length == 1)
+            if (args.Length == 1)
             {
                 var client = new Client(args[0]);
 
@@ -33,12 +34,65 @@ namespace AcFunDanmu
 
                             foreach (var item in actionSignal.Item)
                             {
-                                foreach (var p in item.Payload)
+                                switch (item.SingalType)
                                 {
-                                    var pi = Client.Parse(item.SingalType, p);
+                                    case "CommonActionSignalComment":
+                                        foreach (var pl in item.Payload)
+                                        {
+                                            var comment = CommonActionSignalComment.Parser.ParseFrom(pl);
+                                            Console.WriteLine("{0} - {1}({2}): {3}", comment.SendTimeMs, comment.UserInfo.Nickname, comment.UserInfo.UserId, comment.Content);
+                                        }
+                                        break;
+                                    case "CommonActionSignalLike":
+                                        foreach (var pl in item.Payload)
+                                        {
+                                            var like = CommonActionSignalLike.Parser.ParseFrom(pl);
+                                            Console.WriteLine("{0} - {1}({2}) liked", like.SendTimeMs, like.UserInfo.Nickname, like.UserInfo.UserId);
+                                        }
+                                        break;
+                                    case "CommonActionSignalUserEnterRoom":
+                                        foreach (var pl in item.Payload)
+                                        {
+                                            var enter = CommonActionSignalUserEnterRoom.Parser.ParseFrom(pl);
+                                            Console.WriteLine("{0} - {1}({2}) entered", enter.SendTimeMs, enter.UserInfo.Nickname, enter.UserInfo.UserId);
+                                        }
+                                        break;
+                                    case "CommonActionSignalUserFollowAuthor":
+                                        foreach (var pl in item.Payload)
+                                        {
+                                            var follower = CommonActionSignalUserFollowAuthor.Parser.ParseFrom(pl);
+                                            Console.WriteLine("{0} - {1}({2} entered", follower.SendTimeMs, follower.UserInfo.Nickname, follower.UserInfo.UserId);
+                                        }
+                                        break;
+                                    case "CommonNotifySignalKickedOut":
+                                    case "CommonNotifySignalViolationAlert":
+                                        break;
+                                    case "AcfunActionSignalThrowBanana":
+                                        foreach (var pl in item.Payload)
+                                        {
+                                            var enter = AcfunActionSignalThrowBanana.Parser.ParseFrom(pl);
+                                            Console.WriteLine("{0} - {1}({2}) throwed {3} banana(s)", enter.SendTimeMs, enter.Visitor.Name, enter.Visitor.UserId, enter.Count);
+                                        }
+                                        break;
+                                    case "CommonActionSignalGift":
+                                        foreach (var pl in item.Payload)
+                                        {
+                                            var gift = CommonActionSignalGift.Parser.ParseFrom(pl);
+                                            Console.WriteLine("{0} - {1}({2}) sent gift", gift.SendTimeMs, gift.User.Name, gift.User.UserId);
 #if DEBUG
-                                    Console.WriteLine("Type: {0}, content: {1}", item.SingalType, pi);
+                                            Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}", gift.Number1, gift.Number2, gift.Number3, gift.Number4, gift.Number5, gift.Number6);
 #endif
+                                        }
+                                        break;
+                                    default:
+                                        foreach (var p in item.Payload)
+                                        {
+                                            var pi = Client.Parse(item.SingalType, p);
+#if DEBUG
+                                            Console.WriteLine("Action type: {0}, content: {1}", item.SingalType, pi);
+#endif
+                                        }
+                                        break;
                                 }
                             }
                             break;
@@ -47,10 +101,34 @@ namespace AcFunDanmu
 
                             foreach (var item in signal.Item)
                             {
-                                var pi = Client.Parse(item.SingalType, item.Payload);
+                                switch (item.SingalType)
+                                {
+                                    case "AcfunStateSignalDisplayInfo":
+                                        var acInfo = AcfunStateSignalDisplayInfo.Parser.ParseFrom(item.Payload);
+                                        //Console.WriteLine("Current banada count: {0}", acInfo.BananaCount);
+                                        break;
+                                    case "CommonStateSignalDisplayInfo":
+                                        var stateInfo = CommonStateSignalDisplayInfo.Parser.ParseFrom(item.Payload);
+                                        //Console.WriteLine("{0} watching, {1} likes", stateInfo.WatchingCount, stateInfo.LikeCount);
+                                        break;
+                                    case "CommonStateSignalTopUsers":
+                                        var users = CommonStateSignalTopUsers.Parser.ParseFrom(item.Payload);
+                                        //Console.WriteLine("Top 3 users: {0}", string.Join(", ", users.User.Select(user => user.Detail.Name)));
+                                        break;
+                                    case "CommonStateSignalRecentComment":
+                                        var comments = CommonStateSignalRecentComment.Parser.ParseFrom(item.Payload);
+                                        foreach (var comment in comments.Comment)
+                                        {
+                                            Console.WriteLine("{0} - {1}({2}): {3}", comment.SendTimeMs, comment.UserInfo.Nickname, comment.UserInfo.UserId, comment.Content);
+                                        }
+                                        break;
+                                    default:
+                                        var pi = Client.Parse(item.SingalType, item.Payload);
 #if DEBUG
-                                Console.WriteLine("Type: {0}, content: {1}", item.SingalType, pi);
+                                        Console.WriteLine("State type: {0}, content: {1}", item.SingalType, pi);
 #endif
+                                        break;
+                                }
                             }
                             break;
                         case "ZtLiveScStatusChanged":

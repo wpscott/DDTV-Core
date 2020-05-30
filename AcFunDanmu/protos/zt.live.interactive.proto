@@ -162,28 +162,40 @@ enum ZtLiveDownstreamPayloadErrorCode {
 
 // Undocumented, Unhandled
 
-message CommonStateSignalTopUsers {
-	repeated TopUser user = 1;
+message AcUserInfo {
+	Detail detail = 1;
+	string userInfoJson = 3;
+	string unknown = 4;
 
-	message TopUser {
-		Detail detail = 1;
-		string userInfoJson = 3;
-		string unknown = 4;
+	message Detail {
+		int64 userId = 1;
+		string name = 2;
+		Avatar avator = 3;
 
-		message Detail {
-			int64 userId = 1;
-			string name = 2;
-			Avatar avator = 3;
-
-			message Avatar {
-				string unknown = 1;
-				string url1 = 2;
-				string url2 = 3;
-			}
+		message Avatar {
+			string unknown = 1;
+			string url1 = 2;
+			string url2 = 3;
 		}
 	}
 }
 
+message CommonStateSignalTopUsers {
+	repeated AcUserInfo user = 1;
+}
+
 message CommonStateSignalRecentComment {
 	repeated CommonActionSignalComment comment = 1;
+}
+
+message CommonActionSignalGift {
+	AcUserInfo.Detail user = 1;
+	int64 sendTimeMs = 2;
+	int32 number1 = 3;
+	int32 number2 = 4;
+	int32 number3 = 5;
+	int32 number4 = 6;
+	string uuid = 7;
+	int32 number5 = 8;
+	int32 number6 = 9;
 }
