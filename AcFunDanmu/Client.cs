@@ -105,12 +105,20 @@ namespace AcFunDanmu
             client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
 
             using var index = await client.GetAsync(ACFUN_HOST);
-            if (!index.IsSuccessStatusCode) { return; }
+            if (!index.IsSuccessStatusCode)
+            {
+                Console.WriteLine(await index.Content.ReadAsStringAsync());
+                return;
+            }
             var deviceId = Cookies.GetCookies(ACFUN_HOST).Where(cookie => cookie.Name == "_did").First().Value;
 
             using var loginContent = new FormUrlEncodedContent(LOGIN_FORM);
             using var login = await client.PostAsync(LOGIN_URL, loginContent);
-            if (!login.IsSuccessStatusCode) { return; }
+            if (!login.IsSuccessStatusCode)
+            {
+                Console.WriteLine(await login.Content.ReadAsStringAsync());
+                return;
+            }
             using var loginData = await JsonDocument.ParseAsync(await login.Content.ReadAsStreamAsync());
 
             UserId = loginData.RootElement.GetProperty("userId").GetInt64();
@@ -120,10 +128,18 @@ namespace AcFunDanmu
             using var form = new FormUrlEncodedContent(new Dictionary<string, string> { { "authorId", uid } });
             using var play = await client.PostAsync(string.Format(PLAY_URL, UserId, deviceId, ServiceToken), form);
 
-            if (!play.IsSuccessStatusCode) { return; }
+            if (!play.IsSuccessStatusCode)
+            {
+                Console.WriteLine(await play.Content.ReadAsStringAsync());
+                return;
+            }
 
             using var playData = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
-            if (playData.RootElement.GetProperty("result").GetInt32() != 1) { return; }
+            if (playData.RootElement.GetProperty("result").GetInt32() != 1)
+            {
+                Console.WriteLine(playData.RootElement.GetProperty("error_msg").GetString());
+                return;
+            }
             Tickets = playData.RootElement.GetProperty("data").GetProperty("availableTickets").EnumerateArray().Select(ticket => ticket.ToString()).ToArray();
             EnterRoomAttach = playData.RootElement.GetProperty("data").GetProperty("enterRoomAttach").ToString();
             LiveId = playData.RootElement.GetProperty("data").GetProperty("liveId").ToString();
@@ -133,7 +149,7 @@ namespace AcFunDanmu
 
         public async Task Start()
         {
-            if(UserId == -1 || string.IsNullOrEmpty(ServiceToken) || string.IsNullOrEmpty(SecurityKey) || string.IsNullOrEmpty(LiveId) || string.IsNullOrEmpty(EnterRoomAttach) || Tickets == null)
+            if (UserId == -1 || string.IsNullOrEmpty(ServiceToken) || string.IsNullOrEmpty(SecurityKey) || string.IsNullOrEmpty(LiveId) || string.IsNullOrEmpty(EnterRoomAttach) || Tickets == null)
             {
                 Console.WriteLine("Not initialized or live is ended");
                 return;
@@ -150,6 +166,9 @@ namespace AcFunDanmu
                 InstanceId = regResp.InstanceId;
                 SessionKey = regResp.SessKey.ToBase64();
                 Lz4CompressionThreshold = regResp.SdkOption.Lz4CompressionThresholdBytes;
+
+                //Ping
+                await client.SendAsync(Ping(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
 
                 //Enter room
                 await client.SendAsync(EnterRoom(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
@@ -267,6 +286,9 @@ namespace AcFunDanmu
                 case "Basic.KeepAlive":
                     var keepalive = KeepAliveResponse.Parser.ParseFrom(stream.PayloadData);
                     break;
+                case "Basic.Ping":
+                    var ping = PingResponse.Parser.ParseFrom(stream.PayloadData);
+                    break;
                 case "Push.ZtLiveInteractive.Message":
                     // Handled by caller
                     break;
@@ -326,6 +348,37 @@ namespace AcFunDanmu
                 },
                 SeqId = SeqId,
                 Kpn = KPN,
+            };
+
+            return Encode(header, body);
+        }
+
+        byte[] Ping()
+        {
+            var ping = new PingRequest
+            {
+                PingType = PingRequest.Types.PingType.KPostRegister,
+            };
+
+            var payload = new UpstreamPayload
+            {
+                Command = "Basic.Ping",
+                SeqId = SeqId,
+                RetryCount = RetryCount,
+                PayloadData = ping.ToByteString(),
+                SubBiz = SubBiz
+            };
+
+            var body = payload.ToByteString();
+
+            var header = new PacketHeader
+            {
+                AppId = AppId,
+                Uid = UserId,
+                InstanceId = InstanceId,
+                DecodedPayloadLen = body.Length,
+                EncryptionMode = PacketHeader.Types.EncryptionMode.KEncryptionSessionKey,
+                Kpn = KPN
             };
 
             return Encode(header, body);
