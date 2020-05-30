@@ -155,3 +155,31 @@ enum ZtLiveDownstreamPayloadErrorCode {
 	CS_CMD_CMD_NOT_SUPPORT = 100002;
 	CS_CMD_TICKET_ILLEGAL = 100003;
 }
+
+// Undocumented, Unhandled
+
+message CommonStateSignalTopUsers {
+	repeated TopUser user = 1;
+
+	message TopUser {
+		Detail detail = 1;
+		string userInfoJson = 3;
+		string unknown = 4;
+
+		message Detail {
+			int64 userId = 1;
+			string name = 2;
+			Avatar avator = 3;
+
+			message Avatar {
+				string unknown = 1;
+				string url1 = 2;
+				string url2 = 3;
+			}
+		}
+	}
+}
+
+message CommonStateSignalRecentComment {
+	repeated CommonActionSignalComment comment = 1;
+}

@@ -26,7 +26,7 @@ public static partial class PacketHeaderReflection {
           "a2V0SGVhZGVyEg0KBWFwcElkGAEgASgFEgsKA3VpZBgCIAEoAxISCgppbnN0",
           "YW5jZUlkGAMgASgDEg0KBWZsYWdzGAUgASgNEjAKDGVuY29kaW5nVHlwZRgG",
           "IAEoDjIaLlBhY2tldEhlYWRlci5FbmNvZGluZ1R5cGUSGQoRZGVjb2RlZFBh",
-          "eWxvYWRMZW4YByABKA0SNAoOZW5jcnlwdGlvbk1vZGUYCCABKA4yHC5QYWNr",
+          "eWxvYWRMZW4YByABKAUSNAoOZW5jcnlwdGlvbk1vZGUYCCABKA4yHC5QYWNr",
           "ZXRIZWFkZXIuRW5jcnlwdGlvbk1vZGUSHQoJdG9rZW5JbmZvGAkgASgLMgou",
           "VG9rZW5JbmZvEg0KBXNlcUlkGAogASgDEicKCGZlYXR1cmVzGAsgAygOMhUu",
           "UGFja2V0SGVhZGVyLkZlYXR1cmUSCwoDa3BuGAwgASgJIj8KBUZsYWdzEhAK",
@@ -147,9 +147,9 @@ public sealed partial class PacketHeader : pb::IMessage<PacketHeader> {
 
   /// <summary>Field number for the "decodedPayloadLen" field.</summary>
   public const int DecodedPayloadLenFieldNumber = 7;
-  private uint decodedPayloadLen_;
+  private int decodedPayloadLen_;
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-  public uint DecodedPayloadLen {
+  public int DecodedPayloadLen {
     get { return decodedPayloadLen_; }
     set {
       decodedPayloadLen_ = value;
@@ -286,7 +286,7 @@ public sealed partial class PacketHeader : pb::IMessage<PacketHeader> {
     }
     if (DecodedPayloadLen != 0) {
       output.WriteRawTag(56);
-      output.WriteUInt32(DecodedPayloadLen);
+      output.WriteInt32(DecodedPayloadLen);
     }
     if (EncryptionMode != global::PacketHeader.Types.EncryptionMode.KEncryptionNone) {
       output.WriteRawTag(64);
@@ -329,7 +329,7 @@ public sealed partial class PacketHeader : pb::IMessage<PacketHeader> {
       size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) EncodingType);
     }
     if (DecodedPayloadLen != 0) {
-      size += 1 + pb::CodedOutputStream.ComputeUInt32Size(DecodedPayloadLen);
+      size += 1 + pb::CodedOutputStream.ComputeInt32Size(DecodedPayloadLen);
     }
     if (EncryptionMode != global::PacketHeader.Types.EncryptionMode.KEncryptionNone) {
       size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) EncryptionMode);
@@ -421,7 +421,7 @@ public sealed partial class PacketHeader : pb::IMessage<PacketHeader> {
           break;
         }
         case 56: {
-          DecodedPayloadLen = input.ReadUInt32();
+          DecodedPayloadLen = input.ReadInt32();
           break;
         }
         case 64: {
