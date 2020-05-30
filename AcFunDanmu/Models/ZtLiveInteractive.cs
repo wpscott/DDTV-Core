@@ -41,50 +41,52 @@ public static partial class ZtLiveInteractiveReflection {
           "ASgMEg4KBmxpdmVJZBgEIAEoCRIOCgZ0aWNrZXQYBSABKAkSGQoRc2VydmVy",
           "VGltZXN0YW1wTXMYBiABKAMiMgoPQ29tcHJlc3Npb25UeXBlEgsKB1VOS05P",
           "V04QABIICgROT05FEAESCAoER1pJUBACIj0KFlp0TGl2ZUFjdGlvblNpZ25h",
-          "bEl0ZW0SEgoKc2luZ2FsVHlwZRgBIAEoCRIPCgdwYXlsb2FkGAIgAygMIjwK",
-          "FVp0TGl2ZVN0YXRlU2lnbmFsSXRlbRISCgpzaW5nYWxUeXBlGAEgASgJEg8K",
-          "B3BheWxvYWQYAiABKAwiOwoTWnRMaXZlU2NTdGF0ZVNpZ25hbBIkCgRpdGVt",
-          "GAEgAygLMhYuWnRMaXZlU3RhdGVTaWduYWxJdGVtIj0KFlp0TGl2ZU5vdGlm",
-          "eVNpZ25hbEl0ZW0SEgoKc2lnbmFsVHlwZRgBIAEoCRIPCgdwYXlsb2FkGAIg",
-          "ASgMIj0KFFp0TGl2ZVNjTm90aWZ5U2lnbmFsEiUKBGl0ZW0YASADKAsyFy5a",
-          "dExpdmVOb3RpZnlTaWduYWxJdGVtIpQCChVadExpdmVTY1N0YXR1c0NoYW5n",
-          "ZWQSKQoEdHlwZRgBIAEoDjIbLlp0TGl2ZVNjU3RhdHVzQ2hhbmdlZC5UeXBl",
-          "EhgKEG1heFJhbmRvbURlbGF5TXMYAiABKAMSNQoKYmFubmVkSW5mbxgDIAEo",
-          "CzIhLlp0TGl2ZVNjU3RhdHVzQ2hhbmdlZC5CYW5uZWRJbmZvGh8KCkJhbm5l",
-          "ZEluZm8SEQoJYmFuUmVhc29uGAEgASgJIl4KBFR5cGUSCwoHVU5LTk9XThAA",
-          "Eg8KC0xJVkVfQ0xPU0VEEAESEQoNTElWRV9SRU9QRU5FRBACEhQKEExJVkVf",
-          "VVJMX0NIQU5HRUQQAxIPCgtMSVZFX0JBTk5FRBAEIhcKFVp0TGl2ZVNjVGlj",
-          "a2V0SW52YWxpZCIuCgpadFVzZXJJbmZvEg4KBnVzZXJJZBgBIAEoAxIQCghu",
-          "aWNrbmFtZRgCIAEoCSJfChlDb21tb25BY3Rpb25TaWduYWxDb21tZW50Eg8K",
-          "B2NvbnRlbnQYASABKAkSEgoKc2VuZFRpbWVNcxgCIAEoAxIdCgh1c2VySW5m",
-          "bxgDIAEoCzILLlp0VXNlckluZm8iSwoWQ29tbW9uQWN0aW9uU2lnbmFsTGlr",
-          "ZRIdCgh1c2VySW5mbxgBIAEoCzILLlp0VXNlckluZm8SEgoKc2VuZFRpbWVN",
-          "cxgCIAEoAyJUCh9Db21tb25BY3Rpb25TaWduYWxVc2VyRW50ZXJSb29tEh0K",
-          "CHVzZXJJbmZvGAEgASgLMgsuWnRVc2VySW5mbxISCgpzZW5kVGltZU1zGAIg",
-          "ASgDIlcKIkNvbW1vbkFjdGlvblNpZ25hbFVzZXJGb2xsb3dBdXRob3ISHQoI",
-          "dXNlckluZm8YASABKAsyCy5adFVzZXJJbmZvEhIKCnNlbmRUaW1lTXMYAiAB",
-          "KAMiLQobQ29tbW9uTm90aWZ5U2lnbmFsS2lja2VkT3V0Eg4KBnJlYXNvbhgB",
-          "IAEoCSI8CiBDb21tb25Ob3RpZnlTaWduYWxWaW9sYXRpb25BbGVydBIYChB2",
-          "aW9sYXRpb25Db250ZW50GAEgASgJIkgKHENvbW1vblN0YXRlU2lnbmFsRGlz",
-          "cGxheUluZm8SFQoNd2F0Y2hpbmdDb3VudBgBIAEoCRIRCglsaWtlQ291bnQY",
-          "AiABKAki3QIKGUNvbW1vblN0YXRlU2lnbmFsVG9wVXNlcnMSMAoEdXNlchgB",
-          "IAMoCzIiLkNvbW1vblN0YXRlU2lnbmFsVG9wVXNlcnMuVG9wVXNlchqNAgoH",
-          "VG9wVXNlchI5CgZkZXRhaWwYASABKAsyKS5Db21tb25TdGF0ZVNpZ25hbFRv",
-          "cFVzZXJzLlRvcFVzZXIuRGV0YWlsEhQKDHVzZXJJbmZvSnNvbhgDIAEoCRIP",
-          "Cgd1bmtub3duGAQgASgJGp8BCgZEZXRhaWwSDgoGdXNlcklkGAEgASgDEgwK",
-          "BG5hbWUYAiABKAkSQAoGYXZhdG9yGAMgASgLMjAuQ29tbW9uU3RhdGVTaWdu",
-          "YWxUb3BVc2Vycy5Ub3BVc2VyLkRldGFpbC5BdmF0YXIaNQoGQXZhdGFyEg8K",
-          "B3Vua25vd24YASABKAkSDAoEdXJsMRgCIAEoCRIMCgR1cmwyGAMgASgJIk0K",
-          "HkNvbW1vblN0YXRlU2lnbmFsUmVjZW50Q29tbWVudBIrCgdjb21tZW50GAEg",
-          "AygLMhouQ29tbW9uQWN0aW9uU2lnbmFsQ29tbWVudCrFAQoOQ3NBY2tFcnJv",
-          "ckNvZGUSEgoOU1VDQ0VTU19DU19BQ0sQABIPCgtMSVZFX0NMT1NFRBABEhIK",
-          "DlRJQ0tFVF9JTExFR0FMEAISEgoOQVRUQUNIX0lMTEVHQUwQAxIUChBVU0VS",
-          "X05PVF9JTl9ST09NEAQSEAoMU0VSVkVSX0VSUk9SEAUSGQoVUkVRVUVTVF9Q",
-          "QVJBTV9JTlZBTElEEAYSIwofUk9PTV9OT1RfRVhJU1RfSU5fU1RBVEVfTUFO",
-          "QUdFUhAHKpcBCiBadExpdmVEb3duc3RyZWFtUGF5bG9hZEVycm9yQ29kZRIe",
-          "ChpTVUNDRVNTX0RPV05TVFJFQU1fUEFZTE9BRBAAEhgKEkNTX0NNRF9QQVJT",
-          "RV9FUlJPUhChjQYSHAoWQ1NfQ01EX0NNRF9OT1RfU1VQUE9SVBCijQYSGwoV",
-          "Q1NfQ01EX1RJQ0tFVF9JTExFR0FMEKONBmIGcHJvdG8z"));
+          "bEl0ZW0SEgoKc2luZ2FsVHlwZRgBIAEoCRIPCgdwYXlsb2FkGAIgAygMIj0K",
+          "FFp0TGl2ZVNjQWN0aW9uU2lnbmFsEiUKBGl0ZW0YASADKAsyFy5adExpdmVB",
+          "Y3Rpb25TaWduYWxJdGVtIjwKFVp0TGl2ZVN0YXRlU2lnbmFsSXRlbRISCgpz",
+          "aW5nYWxUeXBlGAEgASgJEg8KB3BheWxvYWQYAiABKAwiOwoTWnRMaXZlU2NT",
+          "dGF0ZVNpZ25hbBIkCgRpdGVtGAEgAygLMhYuWnRMaXZlU3RhdGVTaWduYWxJ",
+          "dGVtIj0KFlp0TGl2ZU5vdGlmeVNpZ25hbEl0ZW0SEgoKc2lnbmFsVHlwZRgB",
+          "IAEoCRIPCgdwYXlsb2FkGAIgASgMIj0KFFp0TGl2ZVNjTm90aWZ5U2lnbmFs",
+          "EiUKBGl0ZW0YASADKAsyFy5adExpdmVOb3RpZnlTaWduYWxJdGVtIpQCChVa",
+          "dExpdmVTY1N0YXR1c0NoYW5nZWQSKQoEdHlwZRgBIAEoDjIbLlp0TGl2ZVNj",
+          "U3RhdHVzQ2hhbmdlZC5UeXBlEhgKEG1heFJhbmRvbURlbGF5TXMYAiABKAMS",
+          "NQoKYmFubmVkSW5mbxgDIAEoCzIhLlp0TGl2ZVNjU3RhdHVzQ2hhbmdlZC5C",
+          "YW5uZWRJbmZvGh8KCkJhbm5lZEluZm8SEQoJYmFuUmVhc29uGAEgASgJIl4K",
+          "BFR5cGUSCwoHVU5LTk9XThAAEg8KC0xJVkVfQ0xPU0VEEAESEQoNTElWRV9S",
+          "RU9QRU5FRBACEhQKEExJVkVfVVJMX0NIQU5HRUQQAxIPCgtMSVZFX0JBTk5F",
+          "RBAEIhcKFVp0TGl2ZVNjVGlja2V0SW52YWxpZCIuCgpadFVzZXJJbmZvEg4K",
+          "BnVzZXJJZBgBIAEoAxIQCghuaWNrbmFtZRgCIAEoCSJfChlDb21tb25BY3Rp",
+          "b25TaWduYWxDb21tZW50Eg8KB2NvbnRlbnQYASABKAkSEgoKc2VuZFRpbWVN",
+          "cxgCIAEoAxIdCgh1c2VySW5mbxgDIAEoCzILLlp0VXNlckluZm8iSwoWQ29t",
+          "bW9uQWN0aW9uU2lnbmFsTGlrZRIdCgh1c2VySW5mbxgBIAEoCzILLlp0VXNl",
+          "ckluZm8SEgoKc2VuZFRpbWVNcxgCIAEoAyJUCh9Db21tb25BY3Rpb25TaWdu",
+          "YWxVc2VyRW50ZXJSb29tEh0KCHVzZXJJbmZvGAEgASgLMgsuWnRVc2VySW5m",
+          "bxISCgpzZW5kVGltZU1zGAIgASgDIlcKIkNvbW1vbkFjdGlvblNpZ25hbFVz",
+          "ZXJGb2xsb3dBdXRob3ISHQoIdXNlckluZm8YASABKAsyCy5adFVzZXJJbmZv",
+          "EhIKCnNlbmRUaW1lTXMYAiABKAMiLQobQ29tbW9uTm90aWZ5U2lnbmFsS2lj",
+          "a2VkT3V0Eg4KBnJlYXNvbhgBIAEoCSI8CiBDb21tb25Ob3RpZnlTaWduYWxW",
+          "aW9sYXRpb25BbGVydBIYChB2aW9sYXRpb25Db250ZW50GAEgASgJIkgKHENv",
+          "bW1vblN0YXRlU2lnbmFsRGlzcGxheUluZm8SFQoNd2F0Y2hpbmdDb3VudBgB",
+          "IAEoCRIRCglsaWtlQ291bnQYAiABKAki3QIKGUNvbW1vblN0YXRlU2lnbmFs",
+          "VG9wVXNlcnMSMAoEdXNlchgBIAMoCzIiLkNvbW1vblN0YXRlU2lnbmFsVG9w",
+          "VXNlcnMuVG9wVXNlchqNAgoHVG9wVXNlchI5CgZkZXRhaWwYASABKAsyKS5D",
+          "b21tb25TdGF0ZVNpZ25hbFRvcFVzZXJzLlRvcFVzZXIuRGV0YWlsEhQKDHVz",
+          "ZXJJbmZvSnNvbhgDIAEoCRIPCgd1bmtub3duGAQgASgJGp8BCgZEZXRhaWwS",
+          "DgoGdXNlcklkGAEgASgDEgwKBG5hbWUYAiABKAkSQAoGYXZhdG9yGAMgASgL",
+          "MjAuQ29tbW9uU3RhdGVTaWduYWxUb3BVc2Vycy5Ub3BVc2VyLkRldGFpbC5B",
+          "dmF0YXIaNQoGQXZhdGFyEg8KB3Vua25vd24YASABKAkSDAoEdXJsMRgCIAEo",
+          "CRIMCgR1cmwyGAMgASgJIk0KHkNvbW1vblN0YXRlU2lnbmFsUmVjZW50Q29t",
+          "bWVudBIrCgdjb21tZW50GAEgAygLMhouQ29tbW9uQWN0aW9uU2lnbmFsQ29t",
+          "bWVudCrFAQoOQ3NBY2tFcnJvckNvZGUSEgoOU1VDQ0VTU19DU19BQ0sQABIP",
+          "CgtMSVZFX0NMT1NFRBABEhIKDlRJQ0tFVF9JTExFR0FMEAISEgoOQVRUQUNI",
+          "X0lMTEVHQUwQAxIUChBVU0VSX05PVF9JTl9ST09NEAQSEAoMU0VSVkVSX0VS",
+          "Uk9SEAUSGQoVUkVRVUVTVF9QQVJBTV9JTlZBTElEEAYSIwofUk9PTV9OT1Rf",
+          "RVhJU1RfSU5fU1RBVEVfTUFOQUdFUhAHKpcBCiBadExpdmVEb3duc3RyZWFt",
+          "UGF5bG9hZEVycm9yQ29kZRIeChpTVUNDRVNTX0RPV05TVFJFQU1fUEFZTE9B",
+          "RBAAEhgKEkNTX0NNRF9QQVJTRV9FUlJPUhChjQYSHAoWQ1NfQ01EX0NNRF9O",
+          "T1RfU1VQUE9SVBCijQYSGwoVQ1NfQ01EX1RJQ0tFVF9JTExFR0FMEKONBmIG",
+          "cHJvdG8z"));
     descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
         new pbr::FileDescriptor[] { },
         new pbr::GeneratedClrTypeInfo(new[] {typeof(global::CsAckErrorCode), typeof(global::ZtLiveDownstreamPayloadErrorCode), }, null, new pbr::GeneratedClrTypeInfo[] {
@@ -98,6 +100,7 @@ public static partial class ZtLiveInteractiveReflection {
           new pbr::GeneratedClrTypeInfo(typeof(global::ZtLiveCsHeartbeatAck), global::ZtLiveCsHeartbeatAck.Parser, new[]{ "ServerTimestampMs", "ClientTimestampMs", "ClientSequence" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ZtLiveScMessage), global::ZtLiveScMessage.Parser, new[]{ "MessageType", "CompressionType", "Payload", "LiveId", "Ticket", "ServerTimestampMs" }, null, new[]{ typeof(global::ZtLiveScMessage.Types.CompressionType) }, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ZtLiveActionSignalItem), global::ZtLiveActionSignalItem.Parser, new[]{ "SingalType", "Payload" }, null, null, null, null),
+          new pbr::GeneratedClrTypeInfo(typeof(global::ZtLiveScActionSignal), global::ZtLiveScActionSignal.Parser, new[]{ "Item" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ZtLiveStateSignalItem), global::ZtLiveStateSignalItem.Parser, new[]{ "SingalType", "Payload" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ZtLiveScStateSignal), global::ZtLiveScStateSignal.Parser, new[]{ "Item" }, null, null, null, null),
           new pbr::GeneratedClrTypeInfo(typeof(global::ZtLiveNotifySignalItem), global::ZtLiveNotifySignalItem.Parser, new[]{ "SignalType", "Payload" }, null, null, null, null),
@@ -1912,6 +1915,127 @@ public sealed partial class ZtLiveActionSignalItem : pb::IMessage<ZtLiveActionSi
 
 }
 
+public sealed partial class ZtLiveScActionSignal : pb::IMessage<ZtLiveScActionSignal> {
+  private static readonly pb::MessageParser<ZtLiveScActionSignal> _parser = new pb::MessageParser<ZtLiveScActionSignal>(() => new ZtLiveScActionSignal());
+  private pb::UnknownFieldSet _unknownFields;
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public static pb::MessageParser<ZtLiveScActionSignal> Parser { get { return _parser; } }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public static pbr::MessageDescriptor Descriptor {
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[10]; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  pbr::MessageDescriptor pb::IMessage.Descriptor {
+    get { return Descriptor; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public ZtLiveScActionSignal() {
+    OnConstruction();
+  }
+
+  partial void OnConstruction();
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public ZtLiveScActionSignal(ZtLiveScActionSignal other) : this() {
+    item_ = other.item_.Clone();
+    _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public ZtLiveScActionSignal Clone() {
+    return new ZtLiveScActionSignal(this);
+  }
+
+  /// <summary>Field number for the "item" field.</summary>
+  public const int ItemFieldNumber = 1;
+  private static readonly pb::FieldCodec<global::ZtLiveActionSignalItem> _repeated_item_codec
+      = pb::FieldCodec.ForMessage(10, global::ZtLiveActionSignalItem.Parser);
+  private readonly pbc::RepeatedField<global::ZtLiveActionSignalItem> item_ = new pbc::RepeatedField<global::ZtLiveActionSignalItem>();
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public pbc::RepeatedField<global::ZtLiveActionSignalItem> Item {
+    get { return item_; }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public override bool Equals(object other) {
+    return Equals(other as ZtLiveScActionSignal);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public bool Equals(ZtLiveScActionSignal other) {
+    if (ReferenceEquals(other, null)) {
+      return false;
+    }
+    if (ReferenceEquals(other, this)) {
+      return true;
+    }
+    if(!item_.Equals(other.item_)) return false;
+    return Equals(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public override int GetHashCode() {
+    int hash = 1;
+    hash ^= item_.GetHashCode();
+    if (_unknownFields != null) {
+      hash ^= _unknownFields.GetHashCode();
+    }
+    return hash;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public override string ToString() {
+    return pb::JsonFormatter.ToDiagnosticString(this);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public void WriteTo(pb::CodedOutputStream output) {
+    item_.WriteTo(output, _repeated_item_codec);
+    if (_unknownFields != null) {
+      _unknownFields.WriteTo(output);
+    }
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public int CalculateSize() {
+    int size = 0;
+    size += item_.CalculateSize(_repeated_item_codec);
+    if (_unknownFields != null) {
+      size += _unknownFields.CalculateSize();
+    }
+    return size;
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public void MergeFrom(ZtLiveScActionSignal other) {
+    if (other == null) {
+      return;
+    }
+    item_.Add(other.item_);
+    _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+  }
+
+  [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+  public void MergeFrom(pb::CodedInputStream input) {
+    uint tag;
+    while ((tag = input.ReadTag()) != 0) {
+      switch(tag) {
+        default:
+          _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+          break;
+        case 10: {
+          item_.AddEntriesFrom(input, _repeated_item_codec);
+          break;
+        }
+      }
+    }
+  }
+
+}
+
 public sealed partial class ZtLiveStateSignalItem : pb::IMessage<ZtLiveStateSignalItem> {
   private static readonly pb::MessageParser<ZtLiveStateSignalItem> _parser = new pb::MessageParser<ZtLiveStateSignalItem>(() => new ZtLiveStateSignalItem());
   private pb::UnknownFieldSet _unknownFields;
@@ -1920,7 +2044,7 @@ public sealed partial class ZtLiveStateSignalItem : pb::IMessage<ZtLiveStateSign
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[10]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[11]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2077,7 +2201,7 @@ public sealed partial class ZtLiveScStateSignal : pb::IMessage<ZtLiveScStateSign
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[11]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[12]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2198,7 +2322,7 @@ public sealed partial class ZtLiveNotifySignalItem : pb::IMessage<ZtLiveNotifySi
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[12]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[13]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2355,7 +2479,7 @@ public sealed partial class ZtLiveScNotifySignal : pb::IMessage<ZtLiveScNotifySi
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[13]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[14]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2476,7 +2600,7 @@ public sealed partial class ZtLiveScStatusChanged : pb::IMessage<ZtLiveScStatusC
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[14]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[15]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2811,7 +2935,7 @@ public sealed partial class ZtLiveScTicketInvalid : pb::IMessage<ZtLiveScTicketI
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[15]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[16]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2912,7 +3036,7 @@ public sealed partial class ZtUserInfo : pb::IMessage<ZtUserInfo> {
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[16]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[17]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3069,7 +3193,7 @@ public sealed partial class CommonActionSignalComment : pb::IMessage<CommonActio
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[17]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[18]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3260,7 +3384,7 @@ public sealed partial class CommonActionSignalLike : pb::IMessage<CommonActionSi
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[18]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[19]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3423,7 +3547,7 @@ public sealed partial class CommonActionSignalUserEnterRoom : pb::IMessage<Commo
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[19]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[20]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3586,7 +3710,7 @@ public sealed partial class CommonActionSignalUserFollowAuthor : pb::IMessage<Co
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[20]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[21]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3749,7 +3873,7 @@ public sealed partial class CommonNotifySignalKickedOut : pb::IMessage<CommonNot
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[21]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[22]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3878,7 +4002,7 @@ public sealed partial class CommonNotifySignalViolationAlert : pb::IMessage<Comm
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[22]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[23]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4007,7 +4131,7 @@ public sealed partial class CommonStateSignalDisplayInfo : pb::IMessage<CommonSt
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[23]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[24]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4164,7 +4288,7 @@ public sealed partial class CommonStateSignalTopUsers : pb::IMessage<CommonState
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[24]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[25]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4873,7 +4997,7 @@ public sealed partial class CommonStateSignalRecentComment : pb::IMessage<Common
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
   public static pbr::MessageDescriptor Descriptor {
-    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[25]; }
+    get { return global::ZtLiveInteractiveReflection.Descriptor.MessageTypes[26]; }
   }
 
   [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

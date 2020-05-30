@@ -3,6 +3,7 @@ using System;
 using System.Data;
 using System.IO;
 using System.IO.Compression;
+using System.Numerics;
 using System.Security.Cryptography;
 
 namespace AcFunDanmu
@@ -17,9 +18,9 @@ namespace AcFunDanmu
         const int Offset = 12;
         static void Main(string[] args)
         {
-            RegisterUp();
+            //RegisterUp();
 
-            RegisterEncode();
+            //RegisterEncode();
             //RegisterDown();
 
             //KeepAliveUp();
@@ -46,6 +47,23 @@ namespace AcFunDanmu
 
             //ZtLiveCsCmdDown("q80AAQAAACMAAACwCA0Qobuaueqv4wEY25SOjqnCoYqmASgBOJcBQAJQ5fqowwFrs0I25yJF/Yd1OloIp91w+R3z7Nn7zfY6hYjir6kiQEJcfPLsOgSpyUDwMP9mhztGx6tHQtKZKceVBnSSOM9SEj1miFGoPRjUQRydfZVNfSIcrgs1gg3k2/BhpH1xAJOyN0zRvCIjqRcppiD5Tn8Y3VVj4ONkwP00u5GJe3JDKtLuaJkaJTZGAZBXO3FDzJHsXUjEhxhiDghtkdyBWSYiInDxrzBkUhk+ub9q2E3aDg==");
 
+            //ZtLiveCsCmdUp("q80AAQAAACsAAABACA0Qobuaueqv4wEY25SOjqnCoYqmATgtQAJQzP+owwFiCUFDRlVOX0FQUFimIm4ux4TsSvmBWq/WBkCx/FLcBtAfUTPxiyt+ArimIkj0jiLWxcT+i2RYrujB6kvHVAp/cC7ODG3WFMgOl5w=");
+            //ZtLiveCsCmdUp("q80AAQAAACcAAACQCA0Qobuaueqv4wEY25SOjqnCoYqmATh0QAJQQWIJQUNGVU5fQVBQVADgxXtWfnQOjbli7u3jSiCYF1v9IlXZfsztC54cPzStVvfA6DXrHdt0JXPYD3QmXVfIzhstJIDun8M4vcqY8mQJ0zbC6z11EV6bVnyARMUhB+e7bWUx5gYVKKprfj7XWCwnFiFvs+XGqypV8CEfIKDCoy2CJ58dLM1HTk5ataBRpj0HKF12X2uzpWtwAphQ");
+
+            //ZtLiveCsCmdDown("q80AAQAAACkAAABwCA0Qobuaueqv4wEY25SOjqnCoYqmASgBOFVAAlBBYglBQ0ZVTl9BUFDNJ5T7bT1/fxFfcxuWO0FoEvTLip1Zsyrjxz4pP7PAlhqXJzakN1vumgJBUe8XT7yBdyC9M/hm+8uP/WK/pxQezUJfsEpM1KH0PeJ1NHG0UArwM3gcCRCBEEAyXkhzg56quQc/M2GF0CfQw+mWiixr");
+            //ZtLiveCsCmdDown("q80AAQAAACMAAACwCA0Qobuaueqv4wEY25SOjqnCoYqmASgBOJcBQAJQzf+owwH5dX8B8LcU+B6ITixRfIY33Iw5ZvO2lsuFx1+y3zHW9za4Q6uGrv/q/w2ioLQHB2J12B+IE2WIv0YlzmbD7T/2M8h944GfpkDsl34EHAb01uPhOtJgZ4NL5keuoBBujkXHOZeaU+jH+PuxlKeUADugzkPwM9dooJ5U6tlfu8qN8viTlkbhiKqG9aVtrqyNkiVDwkoOq/jBZy1SR9h7NM7w9CY1aQsjIaChfq7rb1zFmA==");
+
+            //ZtLiveCsCmdDown("q80AAQAAACkAAABACA0Qobuaueqv4wEY25SOjqnCoYqmASgBOCtAAlA4YglBQ0ZVTl9BUFBHJ/3PpDxmHFQ+606D+sVKcohrDES9Vu719HKCMWdUm3Gp96flUUlm66k7/vZAEFKe7B7Y1OJEsu2Q+TOUViK7");
+
+            //ZtLiveCsCmdDown("q80AAQAAACMAAACwCA0Qobuaueqv4wEY25SOjqnCoYqmASgBOJcBQAJQ8f6owwGrVX2XwxVPC/Y/ZaLSLNQ9fHRHg0JRYTOp4NMbGJbVeKXWq5lPdbLsNEDQXacaNToN4E80OASpemttHzTrb/BqoRQd9YWyHFDj6ExMsvUKU71E+3XqNsOY1ppbDLn/ucSMvwVVThusF5IEbyqLne3c2nxPw5iPZ+v/6YybZDm7J+SDkyxPNJUL89OpuHH9LZ5Dv6864D7S7X6t6rvFnbaHL15CPAwQKfTBbrRzwGKL6Q==");
+
+            //ZtLiveCsCmdDown("q80AAQAAACkAAABwCA0Qobuaueqv4wEY25SOjqnCoYqmASgBOFVAAlA/YglBQ0ZVTl9BUFBG5G2mPJimWVVg4Ohh1uZRopGg8oHaNMr1B1chpHKG4kN7mZV8/fThZbFzDcDvZjynkibNI7ewRifakvso7FlehOOfiIgz8WWYtFa1spYwVKU163tjazywzwEwN+6Ba3IuV/OtMk/yl/LA1Rtl1dx/");
+
+            //ZtLiveCsCmdUp("q80AAQAAACsAAABACA0Qobuaueqv4wEY25SOjqnCoYqmATgtQAJQmICpwwFiCUFDRlVOX0FQUKJvL4glXUgNYPcTgO5tHtF7VyvP5aQA7IB2ZheV2cB7Xq8wSINLvJKMRgQgEM+uf177LcS7HGnPotefTzSckqw=");
+            //ZtLiveCsCmdUp("q80AAQAAACsAAABACA0Qobuaueqv4wEY25SOjqnCoYqmATgtQAJQmYCpwwFiCUFDRlVOX0FQUHJ3A2dK5xzJgIjGYQyedlwT/JuWnz82rWCxWk+8TXIKM/qMVLJEFYJq+IyGakFkKCIu4Au8j5WMLhhHmyPn5MI=");
+
+            //ZtLiveCsCmdDown("q80AAQAAACMAAADgCA0Qobuaueqv4wEY25SOjqnCoYqmASgBOMIBQAJQsoCpwwGYfBaxI9AwFTWi8+4Ke7Ai4r7l1t9YBDlyf5+TeyPA7wfHVXsfDWu4u0VcKB9ydETESf63eo1MFKOnDGbHXERX7bkppM35DnvwH9cyVN0scSvwGOXaOfcdy4NKKPyHFrImwICdjjmN+4BJbpNmBO5X2Ov4Ur7wy7QqAg10OSY3FNYkT/BqWwuod2EBfjSJqQuvtNUs9B4CObqoK9/y3Ghb5vEjZa8YeEUJihXMf1k8t7l/kdGfOdUprzoeuNKs2LGLXA/PP2B353j0csUjdNX6vqaL7pJdKYPlNvUyyY0N3Q==");
+            ZtLiveCsCmdDown("q80AAQAAACMAAAIwCA0Qobuaueqv4wEY25SOjqnCoYqmASgBOJYEQAJQs4CpwwF0JDjXtS/hsxyKUyo9GhhACY1rfUYKQd0fCcKmt8aQXEO/rLzLeZbaZr1UodPZ7AqhlUZvkdYsi/Fm+e1xe9yBPSKLjBl8rdVl6gTgJCq56OvbSKsdDw3AtMlAj4LJ2aM+xeRRBKpHAK7sFn4DUr48SiUMg5M6IN7QKIm4ULEFmd2PZm8IPFAgbFNsIljKH9CUmVsemVOS0zJGAwRxbmDsGM5QwAj6M2rpmzcFh9ZyY6gbgg3SG9XCqZgBMxQc00seJdpW6fYo0JY9rul/NoohXnx2j795jzIAg2rNFVksFLfqxFZH1I5Y1SoRjr3qxK/JS6yJVbntPlHHsnbfhVOD7H0LbGPPRor8zZuGwNWMd1XedmMze2Xv6j/FNTnqzSRArPu8SAKWfVMY98EGznw+X/JrlbKVFfB2JqTgJZYadRaRC/m2tw1Qmx5Bt6KLwGvKMTqA+SfdocGZ40zA8b7WH64N/GgWo8JtB/0M/kCtOlaKMl4SBmViB7uoFNvCcplmgQ4LDhqfwOIac68FhIZPrwxkVEWefQwIr3tTK710JgB/bDKGerlMoND3low/QbIvvwZGSBgqNxED9gohOUb0lIEtNb9UtFwineQDqtcW23Uv/pQ+3w3RrtLundzSifOxmtv9SlYmYNJJ0QiWPpjS0ZvvvccMp+JKXhQZXMy+CbiH0ytjKbygotDbHfbHYH8WWEngd4s8YZ3wcLhpaM8dk0Vyo3TCWYUDsbwRUm5Avg==");
         }
 
         static void RegisterEncode()
@@ -159,27 +177,45 @@ namespace AcFunDanmu
                     ZtLiveScMessage message = ZtLiveScMessage.Parser.ParseFrom(stream.PayloadData);
                     Console.WriteLine(message);
 
+                    var payload = message.CompressionType == ZtLiveScMessage.Types.CompressionType.Gzip ? Decompress(message.Payload) : message.Payload;
+
                     switch (message.MessageType)
                     {
-                        case "ZtLiveScStateSignal":
-                            ZtLiveScStateSignal signal = null;
-                            switch (message.CompressionType)
+                        case "ztLiveScActionSignal":
+                            var actionSignal = ZtLiveScActionSignal.Parser.ParseFrom(payload);
+
+                            Console.WriteLine(actionSignal);
+
+                            foreach (var item in actionSignal.Item)
                             {
-                                case ZtLiveScMessage.Types.CompressionType.None:
-                                    signal = ZtLiveScStateSignal.Parser.ParseFrom(message.Payload);
-                                    break;
-                                case ZtLiveScMessage.Types.CompressionType.Gzip:
-                                    signal = ZtLiveScStateSignal.Parser.ParseFrom(Decompress(message.Payload));
-                                    break;
-                                case ZtLiveScMessage.Types.CompressionType.Unknown:
-                                    return;
+                                foreach(var p in item.Payload)
+                                {
+                                    var pi = Parse(item.SingalType, p);
+
+                                    Console.WriteLine(pi);
+                                }
                             }
-                            Console.WriteLine(signal);
-                            foreach (var item in signal.Item)
+                            break;
+                        case "ZtLiveScStateSignal":
+                            var stateSignal = ZtLiveScStateSignal.Parser.ParseFrom(payload); ;
+
+                            Console.WriteLine(stateSignal);
+
+                            foreach (var item in stateSignal.Item)
                             {
                                 var pi = Parse(item.SingalType, item.Payload);
                                 Console.WriteLine(pi);
                             }
+                            break;
+                        case "ZtLiveScStatusChanged":
+                            var statusChanged = ZtLiveScStatusChanged.Parser.ParseFrom(payload);
+
+                            Console.WriteLine(statusChanged);
+                            break;
+                        case "ZtLiveScTicketInvalid":
+                            var ticketInvalid = ZtLiveScTicketInvalid.Parser.ParseFrom(payload);
+
+                            Console.WriteLine(ticketInvalid);
                             break;
                         default:
                             if (!string.IsNullOrEmpty(message.MessageType))
@@ -190,7 +226,7 @@ namespace AcFunDanmu
                             break;
                     }
                     break;
-                case "ZtLiveCsCmd":
+                case "Global.ZtLiveInteractive.CsCmd":
                     ZtLiveCsCmd cmd = ZtLiveCsCmd.Parser.ParseFrom(stream.PayloadData);
                     Console.WriteLine(cmd);
 
@@ -199,6 +235,14 @@ namespace AcFunDanmu
                         case "ZtLiveCsEnterRoom":
                             var enterRoom = ZtLiveCsEnterRoom.Parser.ParseFrom(cmd.Payload);
                             Console.WriteLine(enterRoom);
+                            break;
+                        case "ZtLiveCsHeartbeat":
+                            var heartbeat = ZtLiveCsHeartbeat.Parser.ParseFrom(cmd.Payload);
+                            Console.WriteLine(heartbeat);
+                            break;
+                        case "ZtLiveCsUserExit":
+                            var userExit = ZtLiveCsUserExit.Parser.ParseFrom(cmd.Payload);
+                            Console.WriteLine(userExit);
                             break;
                         default:
                             Console.WriteLine("Unhandled command: {0}", cmd.CmdType);
@@ -225,22 +269,15 @@ namespace AcFunDanmu
                     ZtLiveScMessage message = ZtLiveScMessage.Parser.ParseFrom(stream.PayloadData);
                     Console.WriteLine(message);
 
+                    var payload = message.CompressionType == ZtLiveScMessage.Types.CompressionType.Gzip ? Decompress(message.Payload) : message.Payload;
+
                     switch (message.MessageType)
                     {
                         case "ZtLiveScStateSignal":
-                            ZtLiveScStateSignal signal = null;
-                            switch (message.CompressionType)
-                            {
-                                case ZtLiveScMessage.Types.CompressionType.None:
-                                    signal = ZtLiveScStateSignal.Parser.ParseFrom(message.Payload);
-                                    break;
-                                case ZtLiveScMessage.Types.CompressionType.Gzip:
-                                    signal = ZtLiveScStateSignal.Parser.ParseFrom(Decompress(message.Payload));
-                                    break;
-                                case ZtLiveScMessage.Types.CompressionType.Unknown:
-                                    return;
-                            }
+                            ZtLiveScStateSignal signal = ZtLiveScStateSignal.Parser.ParseFrom(payload);
+
                             Console.WriteLine(signal);
+
                             foreach (var item in signal.Item)
                             {
                                 var pi = Parse(item.SingalType, item.Payload);
@@ -249,7 +286,7 @@ namespace AcFunDanmu
                             break;
                     }
                     break;
-                case "ZtLiveCsCmdAck":
+                case "Global.ZtLiveInteractive.CsCmd":
                     ZtLiveCsCmdAck cmd = ZtLiveCsCmdAck.Parser.ParseFrom(stream.PayloadData);
                     Console.WriteLine(cmd);
 
@@ -259,7 +296,20 @@ namespace AcFunDanmu
                             var enterRoom = ZtLiveCsEnterRoomAck.Parser.ParseFrom(cmd.Payload);
                             Console.WriteLine(enterRoom);
                             break;
+                        case "ZtLiveCsHeartbeatAck":
+                            var heartbeat = ZtLiveCsHeartbeatAck.Parser.ParseFrom(cmd.Payload);
+                            Console.WriteLine(heartbeat);
+                            break;
+                        default:
+                            Console.WriteLine("Unhandled command: {0}", cmd.CmdAckType);
+                            Console.WriteLine(cmd);
+                            break;
                     }
+                    break;
+                case "Basic.KeepAlive":
+                    var keepalive = KeepAliveResponse.Parser.ParseFrom(stream.PayloadData);
+                    Console.WriteLine(keepalive);
+
                     break;
                 default:
                     Console.WriteLine("Unhandled command: {0}", stream.Command);
@@ -406,26 +456,27 @@ namespace AcFunDanmu
             return ms.ToArray();
         }
 
-        static byte[] Compress(ByteString payload)
+        static ByteString Compress(ByteString payload)
         {
-            using var input = new MemoryStream(payload.ToByteArray());
-            using var gzip = new GZipStream(input, CompressionMode.Compress);
-            using var output = new MemoryStream();
-
-            gzip.CopyTo(output);
-
-            return output.ToArray();
+            return GZip(CompressionMode.Compress, payload);
         }
 
-        static byte[] Decompress(ByteString payload)
+        static ByteString Decompress(ByteString payload)
+        {
+            return GZip(CompressionMode.Decompress, payload);
+        }
+
+        static ByteString GZip(CompressionMode mode, ByteString payload)
         {
             using var input = new MemoryStream(payload.ToByteArray());
-            using var gzip = new GZipStream(input, CompressionMode.Decompress);
+            using var gzip = new GZipStream(input, mode);
             using var output = new MemoryStream();
 
             gzip.CopyTo(output);
 
-            return output.ToArray();
+            output.Position = 0;
+
+            return ByteString.FromStream(output);
         }
 
         static object Parse(string type, ByteString payload)

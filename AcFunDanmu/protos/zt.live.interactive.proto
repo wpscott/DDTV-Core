@@ -61,6 +61,10 @@ message ZtLiveActionSignalItem {
 	repeated bytes payload = 2;
 }
 
+message ZtLiveScActionSignal {
+	repeated ZtLiveActionSignalItem item = 1;
+}
+
 message ZtLiveStateSignalItem {
 	string singalType = 1;
 	bytes payload = 2;
