@@ -15,6 +15,7 @@ using System.Text.Json;
 
 namespace AcFunDanmu
 {
+    public delegate void MessageHandler(DownstreamPayload payload);
     public class Client
     {
         private const string _ACFUN_HOST = "https://m.acfun.cn";
@@ -39,12 +40,14 @@ namespace AcFunDanmu
         const string SubBiz = "mainApp";
         const string ClientLiveSdkVersion = "kwai-acfun-live-link";
 
-        public long UserId { get; set; }
-        public string ServiceToken { get; set; }
-        public string SecurityKey { get; set; }
-        public string LiveId { get; set; }
-        public string EnterRoomAttach { get; set; }
-        public string[] Tickets { get; set; }
+        public MessageHandler Handler { get; set; }
+
+        private long UserId { get; set; }
+        private string ServiceToken { get; set; }
+        private string SecurityKey { get; set; }
+        private string LiveId { get; set; }
+        private string EnterRoomAttach { get; set; }
+        private string[] Tickets { get; set; }
 
         private long InstanceId = 0;
         private string SessionKey { get; set; }
@@ -55,19 +58,37 @@ namespace AcFunDanmu
 
         private ClientWebSocket client;
 
-        private System.Timers.Timer timer = null;
+        private System.Timers.Timer heartbeatTimer = null;
+        private System.Timers.Timer pushTimer = null;
 
         private long SeqId = 1;
         private uint RetryCount = 1;
 
         public Client()
         {
+            Handler = HandleCommand;
+        }
+
+        public Client(string uid) : this()
+        {
             CancellationTokenSource = new CancellationTokenSource();
 
             client = new ClientWebSocket();
+
+            Initialize(uid).Wait();
         }
 
-        public async Task Initialize(string uid)
+        public Client(long userId, string serviceToken, string securityKey, string[] tickets, string enterRoomAttach, string liveId) : this()
+        {
+            UserId = userId;
+            ServiceToken = serviceToken;
+            SecurityKey = securityKey;
+            Tickets = tickets;
+            EnterRoomAttach = enterRoomAttach;
+            LiveId = LiveId;
+        }
+
+        private async Task Initialize(string uid)
         {
             Console.WriteLine("Client initializing");
             var Cookies = new CookieContainer();
@@ -131,8 +152,9 @@ namespace AcFunDanmu
                 //Keep Alive
                 await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
 
-                var timer = new System.Timers.Timer(1000);
-                timer.Elapsed += async (s, e) =>
+                //Push message
+                pushTimer = new System.Timers.Timer(1000);
+                pushTimer.Elapsed += async (s, e) =>
                 {
                     var msg = new UpstreamPayload
                     {
@@ -155,24 +177,55 @@ namespace AcFunDanmu
                         Kpn = KPN,
                     };
 
-                    await client.SendAsync(Encode(header, body), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                    var message = Encode(header, body);
+                    if (client.State == WebSocketState.Open)
+                    {
+                        try
+                        {
+                            await client.SendAsync(message, WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                        }
+                        catch (WebSocketException ex)
+                        {
+                            Console.WriteLine("WebSocket Exception: {0}", ex);
+                            pushTimer.Stop();
+                            pushTimer.Close();
+                            pushTimer.Dispose();
+                        }
+                    }
+                    else
+                    {
+                        pushTimer.Stop();
+                        pushTimer.Close();
+                        pushTimer.Dispose();
+                    }
                 };
-                timer.AutoReset = true;
-                timer.Enabled = true;
+                pushTimer.AutoReset = true;
+                pushTimer.Enabled = true;
 
                 while (client.State == WebSocketState.Open)
                 {
-                    if (CancellationTokenSource.IsCancellationRequested)
+                    try
                     {
+                        if (CancellationTokenSource.IsCancellationRequested)
+                        {
+                            break;
+                        }
+                        var buffer = new byte[BufferSize];
+                        await client.ReceiveAsync(buffer, CancellationTokenSource.Token);
+
+                        var stream = Decode(buffer);
+
+                        Handler(stream);
+
+                    }
+                    catch (WebSocketException e)
+                    {
+                        Console.WriteLine("WebSocket Exception: {0}", e.Message);
                         break;
                     }
-                    var buffer = new byte[BufferSize];
-                    await client.ReceiveAsync(buffer, CancellationTokenSource.Token);
-
-                    var stream = Decode(buffer);
-
-                    HandleCommand(stream);
                 }
+                await client.CloseAsync(WebSocketCloseStatus.Empty, string.Empty, CancellationTokenSource.Token);
+                client.Dispose();
             }
         }
 
@@ -180,53 +233,6 @@ namespace AcFunDanmu
         {
             switch (stream.Command)
             {
-                case "Push.ZtLiveInteractive.Message":
-                    ZtLiveScMessage message = ZtLiveScMessage.Parser.ParseFrom(stream.PayloadData);
-
-                    var payload = message.CompressionType == ZtLiveScMessage.Types.CompressionType.Gzip ? Decompress(message.Payload) : message.Payload;
-
-                    switch (message.MessageType)
-                    {
-                        case "ZtLiveScActionSignal":
-                            var actionSignal = ZtLiveScActionSignal.Parser.ParseFrom(payload);
-
-                            Console.WriteLine(actionSignal);
-
-                            foreach (var item in actionSignal.Item)
-                            {
-                                foreach (var p in item.Payload)
-                                {
-                                    var pi = Parse(item.SingalType, p);
-#if DEBUG
-                                    Console.WriteLine(pi);
-#endif
-                                }
-                            }
-                            break;
-                        case "ZtLiveScStateSignal":
-                            ZtLiveScStateSignal signal = ZtLiveScStateSignal.Parser.ParseFrom(payload);
-
-                            foreach (var item in signal.Item)
-                            {
-                                var pi = Parse(item.SingalType, item.Payload);
-#if DEBUG
-                                Console.WriteLine(pi);
-#endif
-                            }
-                            break;
-                        case "ZtLiveScStatusChanged":
-                            var statusChanged = ZtLiveScStatusChanged.Parser.ParseFrom(payload);
-                            Console.WriteLine(statusChanged);
-                            break;
-                        case "ZtLiveScTicketInvalid":
-                            var ticketInvalid = ZtLiveScTicketInvalid.Parser.ParseFrom(payload);
-                            break;
-                        default:
-                            Console.WriteLine("Unhandled message: {0}", message.MessageType);
-                            Console.WriteLine(message);
-                            break;
-                    }
-                    break;
                 case "Global.ZtLiveInteractive.CsCmd":
                     ZtLiveCsCmdAck cmd = ZtLiveCsCmdAck.Parser.ParseFrom(stream.PayloadData);
 
@@ -235,19 +241,19 @@ namespace AcFunDanmu
                         case "ZtLiveCsEnterRoomAck":
                             var enterRoom = ZtLiveCsEnterRoomAck.Parser.ParseFrom(cmd.Payload);
                             HeaartbeatInterval = enterRoom.HeartbeatIntervalMs;
-                            if (timer == null)
+                            if (heartbeatTimer == null)
                             {
-                                timer = new System.Timers.Timer(HeaartbeatInterval);
-                                timer.Elapsed += Heartbeat;
-                                timer.AutoReset = true;
-                                timer.Enabled = true;
+                                heartbeatTimer = new System.Timers.Timer(HeaartbeatInterval);
+                                heartbeatTimer.Elapsed += Heartbeat;
+                                heartbeatTimer.AutoReset = true;
+                                heartbeatTimer.Enabled = true;
                             }
                             break;
                         case "ZtLiveCsHeartbeatAck":
                             var heartbeat = ZtLiveCsHeartbeatAck.Parser.ParseFrom(cmd.Payload);
                             break;
                         default:
-                            Console.WriteLine("Unhandled command: {0}", cmd.CmdAckType);
+                            Console.WriteLine("Unhandled Global.ZtLiveInteractive.CsCmd: {0}", cmd.CmdAckType);
                             Console.WriteLine(cmd);
                             break;
                     }
@@ -255,8 +261,11 @@ namespace AcFunDanmu
                 case "Basic.KeepAlive":
                     var keepalive = KeepAliveResponse.Parser.ParseFrom(stream.PayloadData);
                     break;
+                case "Push.ZtLiveInteractive.Message":
+                    // Handled by caller
+                    break;
                 default:
-                    Console.WriteLine("Unhandled command: {0}", stream.Command);
+                    Console.WriteLine("Unhandled DownstreamPayload command: {0}", stream.Command);
                     Console.WriteLine(stream);
                     break;
             }
@@ -427,12 +436,33 @@ namespace AcFunDanmu
                 Kpn = KPN
             };
 
-            await client.SendAsync(
-                Encode(header, body),
-                WebSocketMessageType.Binary,
-                true,
-                CancellationTokenSource.Token
-                );
+            var message = Encode(header, body);
+
+            if (client.State == WebSocketState.Open)
+            {
+                try
+                {
+                    await client.SendAsync(
+                        message,
+                        WebSocketMessageType.Binary,
+                        true,
+                        CancellationTokenSource.Token
+                    );
+                }
+                catch (WebSocketException ex)
+                {
+                    Console.WriteLine("WebSocket Exception: {0}", ex);
+                    heartbeatTimer.Stop();
+                    heartbeatTimer.Close();
+                    heartbeatTimer.Dispose();
+                }
+            }
+            else
+            {
+                heartbeatTimer.Stop();
+                heartbeatTimer.Close();
+                heartbeatTimer.Dispose();
+            }
         }
 
         byte[] Encode(PacketHeader header, ByteString body)
@@ -563,7 +593,7 @@ namespace AcFunDanmu
             return GZip(CompressionMode.Compress, payload);
         }
 
-        internal static ByteString Decompress(ByteString payload)
+        public static ByteString Decompress(ByteString payload)
         {
             return GZip(CompressionMode.Decompress, payload);
         }
@@ -581,7 +611,7 @@ namespace AcFunDanmu
             return ByteString.FromStream(output);
         }
 
-        internal static object Parse(string type, ByteString payload)
+        public static object Parse(string type, ByteString payload)
         {
             var t = Type.GetType(type);
             if (t != null)
