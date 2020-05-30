@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+package AcFunDanmu;
+
 import "AccessPoint.proto";
 
 message AccessPointsConfig {

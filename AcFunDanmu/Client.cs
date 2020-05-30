@@ -42,7 +42,7 @@ namespace AcFunDanmu
 
         public MessageHandler Handler { get; set; }
 
-        private long UserId { get; set; }
+        private long UserId { get; set; } = -1;
         private string ServiceToken { get; set; }
         private string SecurityKey { get; set; }
         private string LiveId { get; set; }
@@ -133,6 +133,11 @@ namespace AcFunDanmu
 
         public async Task Start()
         {
+            if(UserId == -1 || string.IsNullOrEmpty(ServiceToken) || string.IsNullOrEmpty(SecurityKey) || string.IsNullOrEmpty(LiveId) || string.IsNullOrEmpty(EnterRoomAttach) || Tickets == null)
+            {
+                Console.WriteLine("Not initialized or live is ended");
+                return;
+            }
             await client.ConnectAsync(Host, CancellationTokenSource.Token);
             if (client.State == WebSocketState.Open)
             {
@@ -153,7 +158,7 @@ namespace AcFunDanmu
                 await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
 
                 //Push message
-                pushTimer = new System.Timers.Timer(1000);
+                pushTimer = new System.Timers.Timer(2000);
                 pushTimer.Elapsed += async (s, e) =>
                 {
                     var msg = new UpstreamPayload
@@ -231,6 +236,7 @@ namespace AcFunDanmu
 
         void HandleCommand(DownstreamPayload stream)
         {
+            if (stream == null) { return; }
             switch (stream.Command)
             {
                 case "Global.ZtLiveInteractive.CsCmd":
@@ -510,6 +516,15 @@ namespace AcFunDanmu
             var key = header.EncryptionMode == PacketHeader.Types.EncryptionMode.KEncryptionServiceToken ? SecurityKey : SessionKey;
 
             var payload = Decrypt(bytes, headerLength, payloadLength, key);
+
+            if (payload.Length != header.DecodedPayloadLen)
+            {
+#if DEBUG
+                Console.WriteLine("Payload length does not match");
+                Console.WriteLine(Convert.ToBase64String(payload));
+#endif
+                return null;
+            }
 
             DownstreamPayload downstream = DownstreamPayload.Parser.ParseFrom(payload);
 

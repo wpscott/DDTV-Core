@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+package AcFunDanmu;
+
 message AppInfo {
     string appName = 1;
     string appVersion = 2;

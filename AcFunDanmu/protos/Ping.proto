@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package AcFunDanmu;
+
 message PingRequest {
     enum PingType {
         kInvalid = 0;

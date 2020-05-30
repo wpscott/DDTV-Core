@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+package AcFunDanmu;
+
 message ZtLiveCsCmd {
 	string cmdType = 1;
 	bytes payload = 2;

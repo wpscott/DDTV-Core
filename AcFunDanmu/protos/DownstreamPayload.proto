@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package AcFunDanmu;
+
 message DownstreamPayload {
     string command = 1;
     int64 seqId = 2;

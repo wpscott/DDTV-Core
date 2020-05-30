@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+package AcFunDanmu;
+
 import "Register.proto";
 import "PushServiceToken.proto";
 import "AccessPointsConfig.proto";

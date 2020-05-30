@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+package AcFunDanmu;
+
 message AccessPoint {
 	AddressType addressType = 1;
 	uint32 port = 2;

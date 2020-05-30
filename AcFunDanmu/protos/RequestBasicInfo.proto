@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+package AcFunDanmu;
+
 import "DeviceInfo.proto";
 import "AppInfo.proto";
 import "EnvInfo.proto";

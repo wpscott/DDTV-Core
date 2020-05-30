@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+package AcFunDanmu;
+
 message SdkOption {
 	int32 reportIntervalSeconds = 1;
 	string reportSecurity = 2;

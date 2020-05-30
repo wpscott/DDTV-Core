@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+package AcFunDanmu;
+
 message TokenInfo {
 	TokenType tokenType = 1;
 	bytes token = 2;

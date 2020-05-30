@@ -19,6 +19,7 @@ namespace AcFunDanmu
 
         static void HandleCommand(DownstreamPayload stream)
         {
+            if (stream == null) { return; }
             switch (stream.Command)
             {
                 // Includes comment, gift, enter room, like, follower
@@ -77,10 +78,18 @@ namespace AcFunDanmu
                                     case "CommonActionSignalGift":
                                         foreach (var pl in item.Payload)
                                         {
+                                            /*
+                                             * Item Id
+                                             * 1 - 香蕉
+                                             * 2 - 吃瓜
+                                             * 6 - 魔法棒
+                                             * 15 - AC机娘
+                                             * 
+                                             */
                                             var gift = CommonActionSignalGift.Parser.ParseFrom(pl);
                                             Console.WriteLine("{0} - {1}({2}) sent gift", gift.SendTimeMs, gift.User.Name, gift.User.UserId);
 #if DEBUG
-                                            Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}", gift.ItemId, gift.Count, gift.Combo, gift.Value, gift.Number5, gift.Number6);
+                                            Console.WriteLine("{0}, {1}, {2}, {3}, {4}, {5}, {6}", gift.ItemId, gift.Count, gift.Combo, gift.Value, gift.Uuid, gift.Number5, gift.Number6);
 #endif
                                         }
                                         break;

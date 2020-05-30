@@ -1,5 +1,7 @@
 ﻿syntax = "proto3";
 
+package AcFunDanmu;
+
 message EnvInfo {
     enum NetworkType {
         kInvalid = 0;
