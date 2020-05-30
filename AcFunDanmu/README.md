@@ -12,11 +12,14 @@ Source: [mplayer.js](https://cdnfile.aixifan.com/static/@ks/mplayer.5d57772120f8
 |  28 + 头数据长度, 具体数据长度 - 16 | AES加密的[UpstreamPayload.proto](https://github.com/wpscott/DDTV-Core/blob/master/AcFunDanmu/protos/UpstreamPayload.proto)或[DownstreamPayload.proto](https://github.com/wpscott/DDTV-Core/blob/master/AcFunDanmu/protos/DownstreamPayload.proto) | 密钥为SecurityKey或SessionKey（由[PacketHeader.proto](https://github.com/wpscott/DDTV-Core/blob/master/AcFunDanmu/protos/PacketHeader.proto)中的encryptionMode指定）。根据command选择对应的protobuf进行进一步的payload解析 |
 
 ## AcFun直播websocket流程
-
-0. 发送Ajax POST请求`https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=OUTSIDE_ANDROID_H5&userId=[用户Id]&did=[DeviceId]&acfun.api.visitor_st=[ServiceToken]`，表单数据为`authorId=[播主Id]`获取`availableTickets`、`liveId`和`enterRoomAttach`
+### 前置流程
+1. 请求`https://m.acfun.cn`获取`_did`Cookies
+2. 发送Ajax POST请求`https://id.app.acfun.cn/rest/app/visitor/login`，表单数据为`sid=acfun.api.visitor`，获取`userId`、`acSecurity`和`acfun.api.visitor_st`
+3. 发送Ajax POST请求`https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=OUTSIDE_ANDROID_H5&userId=[userId]&did=[_did]&acfun.api.visitor_st=[acfun.api.visitor_st]`，表单数据为`authorId=[播主Id]`，获取`availableTickets`、`liveId`和`enterRoomAttach`
+### 正式流程
 1. 建立websocket链接`wss://link.xiatou.com/`
-2. 发送RegisterRequest
-3. 接收RegisterResponse，获取SessionKey
+2. 发送RegisterRequest，`encryptionMode`为`KEncryptionServiceToken`，加密密钥为`acSecurity`
+3. 接收RegisterResponse，获取`instanceId`和`sessKey`。后续`encryptionMode`为`KEncryptionSessionKey`，加密密钥为`sessKey`
 4. 发送KeepAliveRequest
 5. 发送zt.live.interactive.ZtLiveCsCmd，payload为ZtLiveEnterRoom
 6. 接收zt.live.interactive.ZtLiveCsCmd，payload为ZtLiveEnterRoomAck
