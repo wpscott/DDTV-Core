@@ -18,6 +18,7 @@ namespace AcFunDanmu
     public delegate void MessageHandler(DownstreamPayload payload);
     public class Client
     {
+        #region Constants
         private const string _ACFUN_HOST = "https://m.acfun.cn";
         private static readonly Uri ACFUN_HOST = new Uri(_ACFUN_HOST);
         private const string LIVE_URL = "https://m.acfun.cn/live/detail";
@@ -40,21 +41,23 @@ namespace AcFunDanmu
         const string SubBiz = "mainApp";
         const string ClientLiveSdkVersion = "kwai-acfun-live-link";
 
-        const int PushInterval = 1000;
+        const int PushInterval = 2000;
+        #endregion
 
         public MessageHandler Handler { get; set; }
 
-        private long UserId { get; set; } = -1;
-        private string ServiceToken { get; set; }
-        private string SecurityKey { get; set; }
-        private string LiveId { get; set; }
-        private string EnterRoomAttach { get; set; }
-        private string[] Tickets { get; set; }
+        #region Properties and Fields
+        private long UserId = -1;
+        private string ServiceToken;
+        private string SecurityKey;
+        private string LiveId;
+        private string EnterRoomAttach;
+        private string[] Tickets;
 
         private long InstanceId = 0;
-        private string SessionKey { get; set; }
-        private long HeaartbeatInterval { get; set; }
-        private long Lz4CompressionThreshold { get; set; }
+        private string SessionKey;
+        private long HeaartbeatInterval;
+        private long Lz4CompressionThreshold;
 
         private CancellationTokenSource CancellationTokenSource;
 
@@ -64,8 +67,13 @@ namespace AcFunDanmu
         private System.Timers.Timer pushTimer = null;
 
         private long SeqId = 1;
+        private long HeaderSeqId = 1;
+        private long HeartbeatSeqId = 1;
         private uint RetryCount = 1;
+        private int TicketIndex = 0;
+        #endregion
 
+        #region Constructor
         public Client()
         {
             Handler = HandleCommand;
@@ -74,8 +82,6 @@ namespace AcFunDanmu
         public Client(string uid) : this()
         {
             CancellationTokenSource = new CancellationTokenSource();
-
-            client = new ClientWebSocket();
 
             Initialize(uid).Wait();
         }
@@ -87,8 +93,14 @@ namespace AcFunDanmu
             SecurityKey = securityKey;
             Tickets = tickets;
             EnterRoomAttach = enterRoomAttach;
-            LiveId = LiveId;
+            LiveId = liveId;
         }
+
+        public Client(long userId, string serviceToken, string securityKey, string[] tickets, string enterRoomAttach, string liveId, string sessionKey) : this(userId, serviceToken, securityKey, tickets, enterRoomAttach, liveId)
+        {
+            SessionKey = sessionKey;
+        }
+        #endregion
 
         private async Task Initialize(string uid)
         {
@@ -156,9 +168,12 @@ namespace AcFunDanmu
                 Console.WriteLine("Not initialized or live is ended");
                 return;
             }
+            using var client = new ClientWebSocket();
+
             await client.ConnectAsync(Host, CancellationTokenSource.Token);
             if (client.State == WebSocketState.Open)
             {
+                #region Register & Enter Room
                 //Register
                 await client.SendAsync(Register(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
                 var resp = new byte[BufferSize];
@@ -170,14 +185,18 @@ namespace AcFunDanmu
                 Lz4CompressionThreshold = regResp.SdkOption.Lz4CompressionThresholdBytes;
 
                 //Ping
-                await client.SendAsync(Ping(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
-
-                //Enter room
-                await client.SendAsync(EnterRoom(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                //await client.SendAsync(Ping(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
 
                 //Keep Alive
                 await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                SeqId++;
+                HeaderSeqId++;
 
+                //Enter room
+                await client.SendAsync(EnterRoom(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                #endregion
+
+                #region Push Timer
                 //Push message
                 pushTimer = new System.Timers.Timer(PushInterval);
                 pushTimer.Elapsed += async (s, e) =>
@@ -199,7 +218,7 @@ namespace AcFunDanmu
                         InstanceId = InstanceId,
                         DecodedPayloadLen = body.Length,
                         EncryptionMode = PacketHeader.Types.EncryptionMode.KEncryptionSessionKey,
-                        SeqId = SeqId,
+                        SeqId = HeaderSeqId,
                         Kpn = KPN,
                     };
 
@@ -227,13 +246,16 @@ namespace AcFunDanmu
                 };
                 pushTimer.AutoReset = true;
                 pushTimer.Enabled = true;
+                #endregion
 
+                #region Main loop
                 while (client.State == WebSocketState.Open)
                 {
                     try
                     {
                         if (CancellationTokenSource.IsCancellationRequested)
                         {
+                            await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Cancelled", default);
                             break;
                         }
                         var buffer = new byte[BufferSize];
@@ -250,8 +272,7 @@ namespace AcFunDanmu
                         break;
                     }
                 }
-                await client.CloseAsync(WebSocketCloseStatus.Empty, string.Empty, CancellationTokenSource.Token);
-                client.Dispose();
+                #endregion
             }
         }
 
@@ -309,6 +330,7 @@ namespace AcFunDanmu
             }
         }
 
+        #region Common Functions
         byte[] Register()
         {
             var request = new RegisterRequest
@@ -337,7 +359,7 @@ namespace AcFunDanmu
             var payload = new UpstreamPayload
             {
                 Command = "Basic.Register",
-                SeqId = SeqId,
+                SeqId = SeqId++,
                 RetryCount = RetryCount,
                 PayloadData = request.ToByteString(),
                 SubBiz = SubBiz,
@@ -356,7 +378,7 @@ namespace AcFunDanmu
                     TokenType = TokenInfo.Types.TokenType.KServiceToken,
                     Token = ByteString.CopyFromUtf8(ServiceToken),
                 },
-                SeqId = SeqId,
+                SeqId = HeaderSeqId++,
                 Kpn = KPN,
             };
 
@@ -406,14 +428,14 @@ namespace AcFunDanmu
             {
                 CmdType = "ZtLiveCsEnterRoom",
                 Payload = request.ToByteString(),
-                Ticket = Tickets[0],
+                Ticket = Tickets[TicketIndex],
                 LiveId = LiveId,
             };
 
             var payload = new UpstreamPayload
             {
                 Command = "Global.ZtLiveInteractive.CsCmd",
-                SeqId = SeqId,
+                SeqId = SeqId++,
                 RetryCount = RetryCount,
                 PayloadData = cmd.ToByteString(),
                 SubBiz = SubBiz,
@@ -428,6 +450,7 @@ namespace AcFunDanmu
                 InstanceId = InstanceId,
                 DecodedPayloadLen = body.Length,
                 EncryptionMode = PacketHeader.Types.EncryptionMode.KEncryptionSessionKey,
+                SeqId = HeaderSeqId++,
                 Kpn = KPN
             };
 
@@ -472,14 +495,14 @@ namespace AcFunDanmu
             var hearbeat = new ZtLiveCsHeartbeat
             {
                 ClientTimestampMs = DateTimeOffset.Now.ToUnixTimeMilliseconds(),
-                Sequence = SeqId
+                Sequence = HeartbeatSeqId++,
             };
 
             var cmd = new ZtLiveCsCmd
             {
                 CmdType = "ZtLiveCsHeartbeat",
                 Payload = hearbeat.ToByteString(),
-                Ticket = Tickets[0],
+                Ticket = Tickets[TicketIndex],
                 LiveId = LiveId,
             };
 
@@ -501,7 +524,7 @@ namespace AcFunDanmu
                 InstanceId = InstanceId,
                 DecodedPayloadLen = body.Length,
                 EncryptionMode = PacketHeader.Types.EncryptionMode.KEncryptionSessionKey,
-                SeqId = SeqId,
+                SeqId = SeqId++,
                 Kpn = KPN
             };
 
@@ -517,6 +540,8 @@ namespace AcFunDanmu
                         true,
                         CancellationTokenSource.Token
                     );
+
+                    await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
                 }
                 catch (WebSocketException ex)
                 {
@@ -533,7 +558,9 @@ namespace AcFunDanmu
                 heartbeatTimer.Dispose();
             }
         }
+        #endregion
 
+        #region Utils
         byte[] Encode(PacketHeader header, ByteString body)
         {
             var bHeader = header.ToByteString();
@@ -565,12 +592,46 @@ namespace AcFunDanmu
 
             Array.Copy(encrypt, 0, data, Offset + bHeader.Length, encrypt.Length);
 
-            SeqId++;
-
             return data;
         }
 
-        DownstreamPayload Decode(byte[] bytes)
+#if DEBUG
+        public UpstreamPayload DecodeUpstream(byte[] bytes)
+        {
+            var (headerLength, payloadLength) = DecodeLengths(bytes);
+
+            PacketHeader header = DecodeHeader(bytes, headerLength);
+
+            byte[] payload;
+            if (header.EncryptionMode != PacketHeader.Types.EncryptionMode.KEncryptionNone)
+            {
+                var key = header.EncryptionMode == PacketHeader.Types.EncryptionMode.KEncryptionServiceToken ? SecurityKey : SessionKey;
+
+                payload = Decrypt(bytes, headerLength, payloadLength, key);
+            }
+            else
+            {
+                payload = new byte[payloadLength];
+                Array.Copy(bytes, Offset + headerLength, payload, 0, payloadLength);
+            }
+
+
+            if (payload.Length != header.DecodedPayloadLen)
+            {
+#if DEBUG
+                Console.WriteLine("Payload length does not match");
+                Console.WriteLine(Convert.ToBase64String(payload));
+#endif
+                return null;
+            }
+
+            UpstreamPayload upstream = UpstreamPayload.Parser.ParseFrom(payload);
+
+            return upstream;
+        }
+#endif
+
+        public DownstreamPayload Decode(byte[] bytes)
         {
             var (headerLength, payloadLength) = DecodeLengths(bytes);
 
@@ -601,7 +662,11 @@ namespace AcFunDanmu
 
             DownstreamPayload downstream = DownstreamPayload.Parser.ParseFrom(payload);
 
-            SeqId++;
+            if (downstream.Command == "Push.ZtLiveInteractive.Message")
+            {
+                HeaderSeqId = header.SeqId;
+            }
+
 
             return downstream;
         }
@@ -719,5 +784,6 @@ namespace AcFunDanmu
                 return null;
             }
         }
+        #endregion
     }
 }
