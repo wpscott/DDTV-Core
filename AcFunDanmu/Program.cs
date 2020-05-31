@@ -91,7 +91,7 @@ namespace AcFunDanmu
                                      */
                                     var gift = CommonActionSignalGift.Parser.ParseFrom(pl);
                                     var giftName = Client.Gifts[gift.ItemId];
-                                    Console.WriteLine("{0} - {1}({2}) sent gift {3} × {4}, value: {5}", gift.SendTimeMs, gift.User.Name, gift.User.UserId, giftName, gift.Count, gift.Value);
+                                    Console.WriteLine("{0} - {1}({2}) sent gift {3} × {4}, Combo: {5}, value: {6}", gift.SendTimeMs, gift.User.Name, gift.User.UserId, giftName, gift.Count, gift.Combo, gift.Value);
 #if DEBUG
                                     if (string.IsNullOrEmpty(giftName))
                                     {
