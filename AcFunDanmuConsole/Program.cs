@@ -1,7 +1,8 @@
-﻿using System;
+﻿using AcFunDanmu;
+using System;
 using System.Text;
 
-namespace AcFunDanmu
+namespace AcFunDanmuConsole
 {
     class Program
     {

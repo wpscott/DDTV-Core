@@ -1,8 +1,7 @@
 {
   "profiles": {
     "AcFunDanmu": {
-      "commandName": "Project",
-      "commandLineArgs": "23682490"
+      "commandName": "Project"
     }
   }
 }
