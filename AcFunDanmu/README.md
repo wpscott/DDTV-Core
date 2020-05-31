@@ -24,5 +24,6 @@ Source: [mplayer.js](https://cdnfile.aixifan.com/static/@ks/mplayer.5d57772120f8
 5. 发送zt.live.interactive.ZtLiveCsCmd，payload为ZtLiveEnterRoom
 6. 接收zt.live.interactive.ZtLiveCsCmd，payload为ZtLiveEnterRoomAck
 7. 发送/接收弹幕及礼物，具体请查看zt.live.interactive.proto
-8. 接收zt.live.interactive.ZtLiveCsHeartbeat，发送zt.live.interactive.ZtLiveCsHeartbeatAck
-9. 接收UnregisterResponse，直播结束/发送UnregisterRequest，退出直播
+8. 发送zt.live.interactive.ZtLiveCsHeartbeat，接收zt.live.interactive.ZtLiveCsHeartbeatAck
+9. 发送KeepAliveRequest，接收KeepAliveResponse
+10. 接收UnregisterResponse，直播结束/发送UnregisterRequest，退出直播
