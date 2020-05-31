@@ -1,24 +1,47 @@
 ﻿using Google.Protobuf;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Security.Cryptography;
-using System.Net.WebSockets;
-using System.Threading.Tasks;
-using System.Threading;
-using System.Timers;
 using System.Linq;
-using System.Net.Http;
 using System.Net;
-using System.Collections.Generic;
+using System.Net.Http;
+using System.Net.WebSockets;
+using System.Security.Cryptography;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace AcFunDanmu
 {
-    public delegate void MessageHandler(DownstreamPayload payload);
+    public delegate void SignalHandler(string messageType, byte[] payload);
     public class Client
     {
         #region Constants
+        public static readonly string[] Gifts = new string[] {
+            "?",
+            "香蕉",
+            "吃瓜",
+            "",
+            "",
+            "",
+            "魔法棒",
+            "",
+            "",
+            "告白",
+            "666",
+            "菜鸡",
+            "",
+            "",
+            "",
+            "AC机娘",
+            "",
+            "快乐水",
+            "",
+            "",
+            ""
+        };
+
         private const string _ACFUN_HOST = "https://m.acfun.cn";
         private static readonly Uri ACFUN_HOST = new Uri(_ACFUN_HOST);
         private const string LIVE_URL = "https://m.acfun.cn/live/detail";
@@ -30,21 +53,21 @@ namespace AcFunDanmu
 
         private static readonly Dictionary<string, string> LOGIN_FORM = new Dictionary<string, string> { { "sid", "acfun.api.visitor" } };
 
-        const string _Host = "wss://link.xiatou.com/";
-        static readonly Uri Host = new Uri(_Host);
-        const int Offset = 12;
-        const int BufferSize = 1 << 16;
-        const int AppId = 13;
-        const string AppName = "link-sdk";
-        const string SdkVersion = "1.2.1";
-        const string KPN = "ACFUN_APP";
-        const string SubBiz = "mainApp";
-        const string ClientLiveSdkVersion = "kwai-acfun-live-link";
+        private const string _Host = "wss://link.xiatou.com/";
+        private static readonly Uri Host = new Uri(_Host);
+        private const int Offset = 12;
+        private const int BufferSize = 1 << 16;
+        private const int AppId = 13;
+        private const string AppName = "link-sdk";
+        private const string SdkVersion = "1.2.1";
+        private const string KPN = "ACFUN_APP";
+        private const string SubBiz = "mainApp";
+        private const string ClientLiveSdkVersion = "kwai-acfun-live-link";
 
-        const int PushInterval = 2000;
+        private const int PushInterval = 2000;
         #endregion
 
-        public MessageHandler Handler { get; set; }
+        public static SignalHandler Handler { get; set; }
 
         #region Properties and Fields
         private long UserId = -1;
@@ -61,8 +84,6 @@ namespace AcFunDanmu
 
         private CancellationTokenSource CancellationTokenSource;
 
-        private ClientWebSocket client;
-
         private System.Timers.Timer heartbeatTimer = null;
         private System.Timers.Timer pushTimer = null;
 
@@ -76,7 +97,7 @@ namespace AcFunDanmu
         #region Constructor
         public Client()
         {
-            Handler = HandleCommand;
+
         }
 
         public Client(string uid) : this()
@@ -263,7 +284,7 @@ namespace AcFunDanmu
 
                         var stream = Decode(buffer);
 
-                        Handler(stream);
+                        HandleCommand(client, stream);
 
                     }
                     catch (WebSocketException e)
@@ -276,7 +297,7 @@ namespace AcFunDanmu
             }
         }
 
-        void HandleCommand(DownstreamPayload stream)
+        async void HandleCommand(ClientWebSocket client, DownstreamPayload stream)
         {
             if (stream == null) { return; }
             switch (stream.Command)
@@ -292,7 +313,38 @@ namespace AcFunDanmu
                             if (heartbeatTimer == null)
                             {
                                 heartbeatTimer = new System.Timers.Timer(HeaartbeatInterval);
-                                heartbeatTimer.Elapsed += Heartbeat;
+                                heartbeatTimer.Elapsed += async (s, e) =>
+                                {
+                                    if (client.State == WebSocketState.Open)
+                                    {
+                                        try
+                                        {
+                                            await client.SendAsync(
+                                                Heartbeat(),
+                                                WebSocketMessageType.Binary,
+                                                true,
+                                                CancellationTokenSource.Token
+                                            );
+
+                                            await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                                        }
+                                        catch (WebSocketException ex)
+                                        {
+                                            Console.WriteLine("WebSocket Exception: {0}", ex);
+                                            heartbeatTimer.Stop();
+                                            heartbeatTimer.Close();
+                                            heartbeatTimer.Dispose();
+                                            heartbeatTimer = null;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        heartbeatTimer.Stop();
+                                        heartbeatTimer.Close();
+                                        heartbeatTimer.Dispose();
+                                        heartbeatTimer = null;
+                                    }
+                                };
                                 heartbeatTimer.AutoReset = true;
                                 heartbeatTimer.Enabled = true;
                             }
@@ -312,8 +364,39 @@ namespace AcFunDanmu
                 case "Basic.Ping":
                     var ping = PingResponse.Parser.ParseFrom(stream.PayloadData);
                     break;
+                case "Basic.Unregister":
+                    var unregister = UnregisterResponse.Parser.ParseFrom(stream.PayloadData);
+                    await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Unregister", CancellationTokenSource.Token);
+                    break;
                 case "Push.ZtLiveInteractive.Message":
-                    // Handled by caller
+                    ZtLiveScMessage message = ZtLiveScMessage.Parser.ParseFrom(stream.PayloadData);
+
+                    var payload = message.CompressionType == ZtLiveScMessage.Types.CompressionType.Gzip ? Decompress(message.Payload) : message.Payload;
+
+                    switch (message.MessageType)
+                    {
+                        case "ZtLiveScActionSignal":
+                            // Handled by user
+                            Handler(message.MessageType, payload.ToByteArray());
+                            break;
+                        case "ZtLiveScStateSignal":
+                            // Handled by user
+                            Handler(message.MessageType, payload.ToByteArray());
+                            break;
+                        case "ZtLiveScStatusChanged":
+                            var statusChanged = ZtLiveScStatusChanged.Parser.ParseFrom(payload);
+                            if (statusChanged.Type == ZtLiveScStatusChanged.Types.Type.LiveClosed || statusChanged.Type == ZtLiveScStatusChanged.Types.Type.LiveBanned)
+                            {
+                                await client.SendAsync(Unregister(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                                await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Live closed", CancellationTokenSource.Token);
+                            }
+                            break;
+                        case "ZtLiveScTicketInvalid":
+                            var ticketInvalid = ZtLiveScTicketInvalid.Parser.ParseFrom(payload);
+                            TicketIndex++;
+                            await client.SendAsync(EnterRoom(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                            break;
+                    }
                     break;
                 default:
                     if (stream.ErrorCode > 0)
@@ -380,6 +463,32 @@ namespace AcFunDanmu
                 },
                 SeqId = HeaderSeqId++,
                 Kpn = KPN,
+            };
+
+            return Encode(header, body);
+        }
+
+        byte[] Unregister()
+        {
+            var unregister = new UnregisterRequest();
+
+            var payload = new UpstreamPayload
+            {
+                Command = "Basic.Unregister",
+                RetryCount = RetryCount,
+                PayloadData = unregister.ToByteString(),
+                SubBiz = SubBiz
+            };
+
+            var body = payload.ToByteString();
+
+            var header = new PacketHeader
+            {
+                AppId = AppId,
+                Uid = UserId,
+                EncryptionMode = PacketHeader.Types.EncryptionMode.KEncryptionSessionKey,
+                DecodedPayloadLen = body.Length,
+                Kpn = KPN
             };
 
             return Encode(header, body);
@@ -490,7 +599,7 @@ namespace AcFunDanmu
             return Encode(header, body);
         }
 
-        async void Heartbeat(object source, ElapsedEventArgs e)
+        byte[] Heartbeat()
         {
             var hearbeat = new ZtLiveCsHeartbeat
             {
@@ -528,35 +637,7 @@ namespace AcFunDanmu
                 Kpn = KPN
             };
 
-            var message = Encode(header, body);
-
-            if (client.State == WebSocketState.Open)
-            {
-                try
-                {
-                    await client.SendAsync(
-                        message,
-                        WebSocketMessageType.Binary,
-                        true,
-                        CancellationTokenSource.Token
-                    );
-
-                    await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
-                }
-                catch (WebSocketException ex)
-                {
-                    Console.WriteLine("WebSocket Exception: {0}", ex);
-                    heartbeatTimer.Stop();
-                    heartbeatTimer.Close();
-                    heartbeatTimer.Dispose();
-                }
-            }
-            else
-            {
-                heartbeatTimer.Stop();
-                heartbeatTimer.Close();
-                heartbeatTimer.Dispose();
-            }
+            return Encode(header, body);
         }
         #endregion
 
