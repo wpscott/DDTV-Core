@@ -73,23 +73,21 @@ namespace AcFunDanmu
                                      * Item Id
                                      * 1 - 香蕉
                                      * 2 - 吃瓜
-                                     * 4 - 
-                                     * 5 - 立Flag
+                                     * 3 - 
+                                     * 4 - 牛啤
+                                     * 5 - 手柄
                                      * 6 - 魔法棒
-                                     * 7 - 
-                                     * 8 - 
+                                     * 7 - 好人卡
+                                     * 8 - 星蕉雨
                                      * 9 - 告白
                                      * 10 - 666
                                      * 11 - 菜鸡
                                      * 12 - 打Call
-                                     * 13 - 手柄
-                                     * 14 - 
+                                     * 13 - 立FLAG
+                                     * 14 - 窜天猴
                                      * 15 - AC机娘
                                      * 16 - 猴岛
                                      * 17 - 快乐水
-                                     * 18 - 
-                                     * 19 - 
-                                     * 20 - 
                                      */
                                     var gift = CommonActionSignalGift.Parser.ParseFrom(pl);
                                     var giftName = Client.Gifts[gift.ItemId];
