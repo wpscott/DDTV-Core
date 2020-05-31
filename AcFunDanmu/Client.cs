@@ -40,6 +40,8 @@ namespace AcFunDanmu
         const string SubBiz = "mainApp";
         const string ClientLiveSdkVersion = "kwai-acfun-live-link";
 
+        const int PushInterval = 1000;
+
         public MessageHandler Handler { get; set; }
 
         private long UserId { get; set; } = -1;
@@ -177,7 +179,7 @@ namespace AcFunDanmu
                 await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
 
                 //Push message
-                pushTimer = new System.Timers.Timer(2000);
+                pushTimer = new System.Timers.Timer(PushInterval);
                 pushTimer.Elapsed += async (s, e) =>
                 {
                     var msg = new UpstreamPayload
@@ -293,8 +295,16 @@ namespace AcFunDanmu
                     // Handled by caller
                     break;
                 default:
-                    Console.WriteLine("Unhandled DownstreamPayload command: {0}", stream.Command);
-                    Console.WriteLine(stream);
+                    if (stream.ErrorCode > 0)
+                    {
+                        Console.WriteLine("Error： {0} - {1}", stream.ErrorCode, stream.ErrorMsg);
+                        Console.WriteLine(stream.ErrorData.ToBase64());
+                    }
+                    else
+                    {
+                        Console.WriteLine("Unhandled DownstreamPayload command: {0}", stream.Command);
+                        Console.WriteLine(stream);
+                    }
                     break;
             }
         }
@@ -567,7 +577,7 @@ namespace AcFunDanmu
             PacketHeader header = DecodeHeader(bytes, headerLength);
 
             byte[] payload;
-            if(header.EncryptionMode != PacketHeader.Types.EncryptionMode.KEncryptionNone)
+            if (header.EncryptionMode != PacketHeader.Types.EncryptionMode.KEncryptionNone)
             {
                 var key = header.EncryptionMode == PacketHeader.Types.EncryptionMode.KEncryptionServiceToken ? SecurityKey : SessionKey;
 
