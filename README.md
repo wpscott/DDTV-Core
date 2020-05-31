@@ -11,6 +11,29 @@ AcFun直播弹幕解析工具。**开发中**
 
 测试数据来源于`m.acfun.cn.har`，可以在Chrome或Firefox中导入并查看websockets。
 
+### 使用方式
+1. 复制/添加/导入AcFunDanmu文件夹到你的解决方案
+2. 添加AcFunDanmu的项目引用
+3. 添加以下代码片段
+```
+Using AcFunDanmu;
+...
+Client.Handler = (你的自定义函数);
+...
+var client = new Client(用户ID);
+或
+var client = new Cient(用户ID, ServiceToken, SecurityKey, Tickets, EnteryRoomAttach, LiveId);
+await client.Start();
+```
+*具体请参考AcFunDanmuConsole*
+
+## AcFunDanmConsole
+使用AcFunDanmu的控制台AcFun直播弹幕输出工具。
+### 使用方式
+1. 编译
+2. 运行`AcFunDanmuConsole.exe 用户ID（如：69065、23682490或156843）`
+3. 查看弹幕
+
 ## AcFunLiveServer
 AcFunLiveServer是一个简单的控制台项目用于获取AcFun的直播视频流。
 ### 使用方式
