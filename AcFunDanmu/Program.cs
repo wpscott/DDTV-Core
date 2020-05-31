@@ -73,17 +73,27 @@ namespace AcFunDanmu
                                      * Item Id
                                      * 1 - 香蕉
                                      * 2 - 吃瓜
+                                     * 4 - 
+                                     * 5 - 立Flag
                                      * 6 - 魔法棒
+                                     * 7 - 
+                                     * 8 - 
                                      * 9 - 告白
                                      * 10 - 666
                                      * 11 - 菜鸡
+                                     * 12 - 打Call
+                                     * 13 - 手柄
+                                     * 14 - 
                                      * 15 - AC机娘
+                                     * 16 - 猴岛
                                      * 17 - 快乐水
-                                     * 
+                                     * 18 - 
+                                     * 19 - 
+                                     * 20 - 
                                      */
                                     var gift = CommonActionSignalGift.Parser.ParseFrom(pl);
                                     var giftName = Client.Gifts[gift.ItemId];
-                                    Console.WriteLine("{0} - {1}({2}) sent gift {3}, value: {4}", gift.SendTimeMs, gift.User.Name, gift.User.UserId, giftName, gift.Value);
+                                    Console.WriteLine("{0} - {1}({2}) sent gift {3} × {4}, value: {5}", gift.SendTimeMs, gift.User.Name, gift.User.UserId, giftName, gift.Count, gift.Value);
 #if DEBUG
                                     if (string.IsNullOrEmpty(giftName))
                                     {
