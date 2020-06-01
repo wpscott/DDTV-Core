@@ -12,9 +12,9 @@ namespace AcFunDanmuConsole
             {
                 Console.OutputEncoding = Encoding.UTF8; // Support Emoji
 
-                Client.Handler = HandleSignal; // Use your own signal handler
-
                 var client = new Client(args[0]);
+
+                client.Handler = HandleSignal; // Use your own signal handler
 
                 client.Start().Wait();
             }

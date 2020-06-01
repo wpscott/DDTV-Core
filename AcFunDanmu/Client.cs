@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace AcFunDanmu
@@ -61,10 +60,10 @@ namespace AcFunDanmu
         private const string SubBiz = "mainApp";
         private const string ClientLiveSdkVersion = "kwai-acfun-live-link";
 
-        private const int PushInterval = 2000;
+        private const int PushInterval = 1000;
         #endregion
 
-        public static SignalHandler Handler { get; set; }
+        public SignalHandler Handler { get; set; }
 
         #region Properties and Fields
         private long UserId = -1;
@@ -78,11 +77,6 @@ namespace AcFunDanmu
         private string SessionKey;
         private long HeaartbeatInterval;
         private long Lz4CompressionThreshold;
-
-        private CancellationTokenSource CancellationTokenSource;
-
-        private System.Timers.Timer heartbeatTimer = null;
-        private System.Timers.Timer pushTimer = null;
 
         private long SeqId = 1;
         private long HeaderSeqId = 1;
@@ -99,8 +93,6 @@ namespace AcFunDanmu
 
         public Client(string uid) : this()
         {
-            CancellationTokenSource = new CancellationTokenSource();
-
             Initialize(uid).Wait();
         }
 
@@ -188,14 +180,14 @@ namespace AcFunDanmu
             }
             using var client = new ClientWebSocket();
 
-            await client.ConnectAsync(Host, CancellationTokenSource.Token);
+            await client.ConnectAsync(Host, default);
             if (client.State == WebSocketState.Open)
             {
                 #region Register & Enter Room
                 //Register
-                await client.SendAsync(Register(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                await client.SendAsync(Register(), WebSocketMessageType.Binary, true, default);
                 var resp = new byte[BufferSize];
-                await client.ReceiveAsync(resp, CancellationTokenSource.Token);
+                await client.ReceiveAsync(resp, default);
                 var registerDown = Decode(resp);
                 var regResp = RegisterResponse.Parser.ParseFrom(registerDown.PayloadData);
                 InstanceId = regResp.InstanceId;
@@ -203,63 +195,66 @@ namespace AcFunDanmu
                 Lz4CompressionThreshold = regResp.SdkOption.Lz4CompressionThresholdBytes;
 
                 //Ping
-                //await client.SendAsync(Ping(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                //await client.SendAsync(Ping(), WebSocketMessageType.Binary, true, default);
 
                 //Keep Alive
-                await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, default);
                 SeqId++;
                 HeaderSeqId++;
 
                 //Enter room
-                await client.SendAsync(EnterRoom(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                await client.SendAsync(EnterRoom(), WebSocketMessageType.Binary, true, default);
                 #endregion
 
-                #region Push Timer
+                #region Timers
                 //Push message
-                pushTimer = new System.Timers.Timer(PushInterval);
-                pushTimer.Elapsed += async (s, e) =>
+                using var heartbeatTimer = new System.Timers.Timer();
+                heartbeatTimer.Elapsed += async (s, e) =>
                 {
-                    var msg = new UpstreamPayload
-                    {
-                        Command = "Push.ZtLiveInteractive.Message",
-                        SeqId = SeqId,
-                        RetryCount = RetryCount,
-                        SubBiz = SubBiz
-                    };
-
-                    var body = msg.ToByteString();
-
-                    var header = new PacketHeader
-                    {
-                        AppId = AppId,
-                        Uid = UserId,
-                        InstanceId = InstanceId,
-                        DecodedPayloadLen = body.Length,
-                        EncryptionMode = PacketHeader.Types.EncryptionMode.KEncryptionSessionKey,
-                        SeqId = HeaderSeqId,
-                        Kpn = KPN,
-                    };
-
-                    var message = Encode(header, body);
                     if (client.State == WebSocketState.Open)
                     {
                         try
                         {
-                            await client.SendAsync(message, WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                            await client.SendAsync(
+                                Heartbeat(),
+                                WebSocketMessageType.Binary,
+                                true,
+                                default
+                            );
+
+                            await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, default);
                         }
                         catch (WebSocketException ex)
                         {
-                            Console.WriteLine("WebSocket Exception: {0}", ex);
+                            Console.WriteLine("Heartbeat - WebSocket Exception: {0}", ex);
+                            heartbeatTimer.Stop();
+                        }
+                    }
+                    else
+                    {
+                        heartbeatTimer.Stop();
+                    }
+                };
+                heartbeatTimer.AutoReset = true;
+
+                using var pushTimer = new System.Timers.Timer(PushInterval);
+                pushTimer.Elapsed += async (s, e) =>
+                {
+                    if (client.State == WebSocketState.Open)
+                    {
+                        try
+                        {
+                            await client.SendAsync(PushMessage(), WebSocketMessageType.Binary, true, default);
+                        }
+                        catch (WebSocketException ex)
+                        {
+                            Console.WriteLine("Push - WebSocket Exception: {0}", ex);
                             pushTimer.Stop();
-                            pushTimer.Close();
-                            pushTimer.Dispose();
                         }
                     }
                     else
                     {
                         pushTimer.Stop();
-                        pushTimer.Close();
-                        pushTimer.Dispose();
                     }
                 };
                 pushTimer.AutoReset = true;
@@ -271,22 +266,17 @@ namespace AcFunDanmu
                 {
                     try
                     {
-                        if (CancellationTokenSource.IsCancellationRequested)
-                        {
-                            await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Cancelled", default);
-                            break;
-                        }
                         var buffer = new byte[BufferSize];
-                        await client.ReceiveAsync(buffer, CancellationTokenSource.Token);
+                        await client.ReceiveAsync(buffer, default);
 
                         var stream = Decode(buffer);
 
-                        HandleCommand(client, stream);
+                        HandleCommand(client, stream, heartbeatTimer);
 
                     }
                     catch (WebSocketException e)
                     {
-                        Console.WriteLine("WebSocket Exception: {0}", e.Message);
+                        Console.WriteLine("Main - WebSocket Exception: {0}", e);
                         break;
                     }
                 }
@@ -294,7 +284,7 @@ namespace AcFunDanmu
             }
         }
 
-        async void HandleCommand(ClientWebSocket client, DownstreamPayload stream)
+        async void HandleCommand(ClientWebSocket client, DownstreamPayload stream, System.Timers.Timer heartbeatTimer)
         {
             if (stream == null) { return; }
             switch (stream.Command)
@@ -306,45 +296,8 @@ namespace AcFunDanmu
                     {
                         case "ZtLiveCsEnterRoomAck":
                             var enterRoom = ZtLiveCsEnterRoomAck.Parser.ParseFrom(cmd.Payload);
-                            HeaartbeatInterval = enterRoom.HeartbeatIntervalMs;
-                            if (heartbeatTimer == null)
-                            {
-                                heartbeatTimer = new System.Timers.Timer(HeaartbeatInterval);
-                                heartbeatTimer.Elapsed += async (s, e) =>
-                                {
-                                    if (client.State == WebSocketState.Open)
-                                    {
-                                        try
-                                        {
-                                            await client.SendAsync(
-                                                Heartbeat(),
-                                                WebSocketMessageType.Binary,
-                                                true,
-                                                CancellationTokenSource.Token
-                                            );
-
-                                            await client.SendAsync(KeepAlive(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
-                                        }
-                                        catch (WebSocketException ex)
-                                        {
-                                            Console.WriteLine("WebSocket Exception: {0}", ex);
-                                            heartbeatTimer.Stop();
-                                            heartbeatTimer.Close();
-                                            heartbeatTimer.Dispose();
-                                            heartbeatTimer = null;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        heartbeatTimer.Stop();
-                                        heartbeatTimer.Close();
-                                        heartbeatTimer.Dispose();
-                                        heartbeatTimer = null;
-                                    }
-                                };
-                                heartbeatTimer.AutoReset = true;
-                                heartbeatTimer.Enabled = true;
-                            }
+                            heartbeatTimer.Interval = enterRoom.HeartbeatIntervalMs;
+                            heartbeatTimer.Start();
                             break;
                         case "ZtLiveCsHeartbeatAck":
                             var heartbeat = ZtLiveCsHeartbeatAck.Parser.ParseFrom(cmd.Payload);
@@ -363,7 +316,7 @@ namespace AcFunDanmu
                     break;
                 case "Basic.Unregister":
                     var unregister = UnregisterResponse.Parser.ParseFrom(stream.PayloadData);
-                    await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Unregister", CancellationTokenSource.Token);
+                    await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Unregister", default);
                     break;
                 case "Push.ZtLiveInteractive.Message":
                     ZtLiveScMessage message = ZtLiveScMessage.Parser.ParseFrom(stream.PayloadData);
@@ -384,14 +337,14 @@ namespace AcFunDanmu
                             var statusChanged = ZtLiveScStatusChanged.Parser.ParseFrom(payload);
                             if (statusChanged.Type == ZtLiveScStatusChanged.Types.Type.LiveClosed || statusChanged.Type == ZtLiveScStatusChanged.Types.Type.LiveBanned)
                             {
-                                await client.SendAsync(Unregister(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
-                                await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Live closed", CancellationTokenSource.Token);
+                                await client.SendAsync(Unregister(), WebSocketMessageType.Binary, true, default);
+                                await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Live closed", default);
                             }
                             break;
                         case "ZtLiveScTicketInvalid":
                             var ticketInvalid = ZtLiveScTicketInvalid.Parser.ParseFrom(payload);
-                            TicketIndex++;
-                            await client.SendAsync(EnterRoom(), WebSocketMessageType.Binary, true, CancellationTokenSource.Token);
+                            TicketIndex = (TicketIndex + 1) % Tickets.Length;
+                            await client.SendAsync(EnterRoom(), WebSocketMessageType.Binary, true, default);
                             break;
                     }
                     break;
@@ -590,6 +543,32 @@ namespace AcFunDanmu
                 DecodedPayloadLen = body.Length,
                 EncryptionMode = PacketHeader.Types.EncryptionMode.KEncryptionSessionKey,
                 SeqId = SeqId,
+                Kpn = KPN,
+            };
+
+            return Encode(header, body);
+        }
+
+        byte[] PushMessage()
+        {
+            var msg = new UpstreamPayload
+            {
+                Command = "Push.ZtLiveInteractive.Message",
+                SeqId = SeqId,
+                RetryCount = RetryCount,
+                SubBiz = SubBiz
+            };
+
+            var body = msg.ToByteString();
+
+            var header = new PacketHeader
+            {
+                AppId = AppId,
+                Uid = UserId,
+                InstanceId = InstanceId,
+                DecodedPayloadLen = body.Length,
+                EncryptionMode = PacketHeader.Types.EncryptionMode.KEncryptionSessionKey,
+                SeqId = HeaderSeqId,
                 Kpn = KPN,
             };
 
