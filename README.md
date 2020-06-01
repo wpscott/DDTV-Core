@@ -18,11 +18,11 @@ AcFun直播弹幕解析工具。**开发中**
 ```
 Using AcFunDanmu;
 ...
-Client.Handler = (你的自定义函数);
-...
 var client = new Client(用户ID);
 或
 var client = new Cient(用户ID, ServiceToken, SecurityKey, Tickets, EnteryRoomAttach, LiveId);
+
+client.Handler = (你的自定义函数);
 await client.Start();
 ```
 *具体请参考AcFunDanmuConsole*
