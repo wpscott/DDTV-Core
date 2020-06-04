@@ -2,6 +2,8 @@
 
 Source: [6.js](https://cdnfile.aixifan.com/static/js/6.c9255644.js)
 
+*[Im.proto](https://github.com/wpscott/DDTV-Core/blob/master/AcFunDanmu/protos/Im.proto)为主站websocket，主要负责私信、推送之类的。（包含未来可能推出的频道及群聊功能）*
+
 ## AcFun直播websocket数据结构
 
 | 起始位置，偏移量  |  结构 |  说明 |
