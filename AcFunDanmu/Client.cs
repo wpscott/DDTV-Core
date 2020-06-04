@@ -25,7 +25,7 @@ namespace AcFunDanmu
             "?",
             "牛啤",
             "手柄",
-            "手柄",
+            "魔法棒",
             "好人卡",
             "星蕉雨",
             "告白",
@@ -37,6 +37,11 @@ namespace AcFunDanmu
             "AC机娘",
             "猴岛",
             "快乐水",
+            "?",
+            "?",
+            "?",
+            "生日快乐",
+            "六一快乐"
         };
 
         private const string _ACFUN_HOST = "https://live.acfun.cn";
@@ -65,8 +70,6 @@ namespace AcFunDanmu
         private const string KPF = "PC_WEB";
         private const string SubBiz = "mainApp";
         private const string ClientLiveSdkVersion = "kwai-acfun-live-link";
-
-        private const int PushInterval = 1000;
         #endregion
 
         public SignalHandler Handler { get; set; }
@@ -265,29 +268,6 @@ namespace AcFunDanmu
                     }
                 };
                 heartbeatTimer.AutoReset = true;
-
-                using var pushTimer = new System.Timers.Timer(PushInterval);
-                pushTimer.Elapsed += async (s, e) =>
-                {
-                    if (client.State == WebSocketState.Open)
-                    {
-                        try
-                        {
-                            await client.SendAsync(PushMessage(), WebSocketMessageType.Binary, true, default);
-                        }
-                        catch (WebSocketException ex)
-                        {
-                            Console.WriteLine("Push - WebSocket Exception: {0}", ex);
-                            pushTimer.Stop();
-                        }
-                    }
-                    else
-                    {
-                        pushTimer.Stop();
-                    }
-                };
-                pushTimer.AutoReset = true;
-                pushTimer.Enabled = true;
                 #endregion
 
                 #region Main loop
@@ -348,6 +328,7 @@ namespace AcFunDanmu
                     await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Unregister", default);
                     break;
                 case Enums.Command.PUSH_MESSAGE:
+                    await client.SendAsync(PushMessage(), WebSocketMessageType.Binary, true, default);
                     ZtLiveScMessage message = ZtLiveScMessage.Parser.ParseFrom(stream.PayloadData);
 
                     var payload = message.CompressionType == ZtLiveScMessage.Types.CompressionType.Gzip ? Decompress(message.Payload) : message.Payload;
@@ -724,16 +705,16 @@ namespace AcFunDanmu
             PacketHeader header = DecodeHeader(bytes, headerLength, PrintHeader);
 
             byte[] payload;
-            if (header.EncryptionMode != PacketHeader.Types.EncryptionMode.KEncryptionNone)
+            if (header.EncryptionMode == PacketHeader.Types.EncryptionMode.KEncryptionNone)
+            {
+                payload = new byte[payloadLength];
+                Array.Copy(bytes, Offset + headerLength, payload, 0, payloadLength);
+            }
+            else
             {
                 var key = header.EncryptionMode == PacketHeader.Types.EncryptionMode.KEncryptionServiceToken ? SecurityKey : SessionKey;
 
                 payload = Decrypt(bytes, headerLength, payloadLength, key);
-            }
-            else
-            {
-                payload = new byte[payloadLength];
-                Array.Copy(bytes, Offset + headerLength, payload, 0, payloadLength);
             }
 
 
