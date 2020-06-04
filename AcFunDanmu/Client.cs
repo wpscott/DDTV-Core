@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AcFunDanmu
@@ -38,16 +39,20 @@ namespace AcFunDanmu
             "快乐水",
         };
 
-        private const string _ACFUN_HOST = "https://m.acfun.cn";
+        private const string _ACFUN_HOST = "https://live.acfun.cn";
         private static readonly Uri ACFUN_HOST = new Uri(_ACFUN_HOST);
-        private const string LIVE_URL = "https://m.acfun.cn/live/detail";
+        private const string LIVE_URL = "https://live.acfun.cn/live";
         private const string LOGIN_URL = "https://id.app.acfun.cn/rest/app/visitor/login";
         private static readonly Uri LOGIN_URI = new Uri(LOGIN_URL);
-        private const string PLAY_URL = "https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=OUTSIDE_IOS_H5&userId={0}&did={1}&acfun.api.visitor_st={2}";
+        private const string GET_TOKEN_URL = "https://id.app.acfun.cn/rest/web/token/get";
+        private static readonly Uri GET_TOKEN_URI = new Uri(GET_TOKEN_URL);
+        private const string PLAY_URL = "https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId={0}&did={1}&acfun.api.visitor_st={2}";
+        private const string GIFT_URL = "http://api.kuaishouzt.com/rest/zt/live/web/gift/list?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId={0}&did={1}&acfun.midground.api_st={2}";
 
-        private const string UserAgent = "Mozilla/5.0 (iPad; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
+        private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36";
 
         private static readonly Dictionary<string, string> LOGIN_FORM = new Dictionary<string, string> { { "sid", "acfun.api.visitor" } };
+        private static readonly Dictionary<string, string> GET_TOKEN_FORM = new Dictionary<string, string> { { "sid", "acfun.midground.api" } };
 
         private const string _Host = "wss://link.xiatou.com/";
         private static readonly Uri Host = new Uri(_Host);
@@ -57,6 +62,7 @@ namespace AcFunDanmu
         private const string AppName = "link-sdk";
         private const string SdkVersion = "1.2.1";
         private const string KPN = "ACFUN_APP";
+        private const string KPF = "PC_WEB";
         private const string SubBiz = "mainApp";
         private const string ClientLiveSdkVersion = "kwai-acfun-live-link";
 
@@ -83,6 +89,8 @@ namespace AcFunDanmu
         private long HeartbeatSeqId = 1;
         private uint RetryCount = 1;
         private int TicketIndex = 0;
+
+        private bool PrintHeader = false;
         #endregion
 
         #region Constructor
@@ -109,6 +117,7 @@ namespace AcFunDanmu
         public Client(long userId, string serviceToken, string securityKey, string[] tickets, string enterRoomAttach, string liveId, string sessionKey) : this(userId, serviceToken, securityKey, tickets, enterRoomAttach, liveId)
         {
             SessionKey = sessionKey;
+            PrintHeader = true;
         }
         #endregion
 
@@ -116,6 +125,8 @@ namespace AcFunDanmu
         {
             Console.WriteLine("Client initializing");
             var Cookies = new CookieContainer();
+
+            var loaded = LoadCookies(Cookies);
 
             var client = new HttpClient(
                 new HttpClientHandler
@@ -125,10 +136,10 @@ namespace AcFunDanmu
                     CookieContainer = Cookies
                 }
             );
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent); // Mobile only
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
             client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
 
-            using var index = await client.GetAsync(ACFUN_HOST);
+            using var index = await client.GetAsync($"{LIVE_URL}/{uid}");
             if (!index.IsSuccessStatusCode)
             {
                 Console.WriteLine(await index.Content.ReadAsStringAsync());
@@ -136,18 +147,36 @@ namespace AcFunDanmu
             }
             var deviceId = Cookies.GetCookies(ACFUN_HOST).Where(cookie => cookie.Name == "_did").First().Value;
 
-            using var loginContent = new FormUrlEncodedContent(LOGIN_FORM);
-            using var login = await client.PostAsync(LOGIN_URL, loginContent);
-            if (!login.IsSuccessStatusCode)
+            if (loaded)
             {
-                Console.WriteLine(await login.Content.ReadAsStringAsync());
-                return;
-            }
-            using var loginData = await JsonDocument.ParseAsync(await login.Content.ReadAsStreamAsync());
+                using var gettokenContent = new FormUrlEncodedContent(GET_TOKEN_FORM);
+                using var gettoken = await client.PostAsync(GET_TOKEN_URI, gettokenContent);
+                if (!gettoken.IsSuccessStatusCode)
+                {
+                    Console.WriteLine(await gettoken.Content.ReadAsStringAsync());
+                    return;
+                }
+                using var tokenData = await JsonDocument.ParseAsync(await gettoken.Content.ReadAsStreamAsync());
 
-            UserId = loginData.RootElement.GetProperty("userId").GetInt64();
-            ServiceToken = loginData.RootElement.GetProperty("acfun.api.visitor_st").ToString();
-            SecurityKey = loginData.RootElement.GetProperty("acSecurity").ToString();
+                UserId = tokenData.RootElement.GetProperty("userId").GetInt64();
+                ServiceToken = tokenData.RootElement.GetProperty("acfun.api.visitor_st").ToString();
+                SecurityKey = tokenData.RootElement.GetProperty("acSecurity").ToString();
+            }
+            else
+            {
+                using var loginContent = new FormUrlEncodedContent(LOGIN_FORM);
+                using var login = await client.PostAsync(LOGIN_URI, loginContent);
+                if (!login.IsSuccessStatusCode)
+                {
+                    Console.WriteLine(await login.Content.ReadAsStringAsync());
+                    return;
+                }
+                using var loginData = await JsonDocument.ParseAsync(await login.Content.ReadAsStreamAsync());
+
+                UserId = loginData.RootElement.GetProperty("userId").GetInt64();
+                ServiceToken = loginData.RootElement.GetProperty("acfun.api.visitor_st").ToString();
+                SecurityKey = loginData.RootElement.GetProperty("acSecurity").ToString();
+            }
 
             using var form = new FormUrlEncodedContent(new Dictionary<string, string> { { "authorId", uid } });
             using var play = await client.PostAsync(string.Format(PLAY_URL, UserId, deviceId, ServiceToken), form);
@@ -289,17 +318,17 @@ namespace AcFunDanmu
             if (stream == null) { return; }
             switch (stream.Command)
             {
-                case "Global.ZtLiveInteractive.CsCmd":
+                case Enums.Command.GLOBAL_COMMAND:
                     ZtLiveCsCmdAck cmd = ZtLiveCsCmdAck.Parser.ParseFrom(stream.PayloadData);
 
                     switch (cmd.CmdAckType)
                     {
-                        case "ZtLiveCsEnterRoomAck":
+                        case Enums.GlobalCommand.ENTER_ROOM_ACK:
                             var enterRoom = ZtLiveCsEnterRoomAck.Parser.ParseFrom(cmd.Payload);
                             heartbeatTimer.Interval = enterRoom.HeartbeatIntervalMs;
                             heartbeatTimer.Start();
                             break;
-                        case "ZtLiveCsHeartbeatAck":
+                        case Enums.GlobalCommand.HEARTBEAT_ACK:
                             var heartbeat = ZtLiveCsHeartbeatAck.Parser.ParseFrom(cmd.Payload);
                             break;
                         default:
@@ -308,32 +337,32 @@ namespace AcFunDanmu
                             break;
                     }
                     break;
-                case "Basic.KeepAlive":
+                case Enums.Command.KEEP_ALIVE:
                     var keepalive = KeepAliveResponse.Parser.ParseFrom(stream.PayloadData);
                     break;
-                case "Basic.Ping":
+                case Enums.Command.PING:
                     var ping = PingResponse.Parser.ParseFrom(stream.PayloadData);
                     break;
-                case "Basic.Unregister":
+                case Enums.Command.UNREGISTER:
                     var unregister = UnregisterResponse.Parser.ParseFrom(stream.PayloadData);
                     await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Unregister", default);
                     break;
-                case "Push.ZtLiveInteractive.Message":
+                case Enums.Command.PUSH_MESSAGE:
                     ZtLiveScMessage message = ZtLiveScMessage.Parser.ParseFrom(stream.PayloadData);
 
                     var payload = message.CompressionType == ZtLiveScMessage.Types.CompressionType.Gzip ? Decompress(message.Payload) : message.Payload;
 
                     switch (message.MessageType)
                     {
-                        case "ZtLiveScActionSignal":
+                        case Enums.PushMessage.ACTION_SIGNAL:
                             // Handled by user
                             Handler(message.MessageType, payload.ToByteArray());
                             break;
-                        case "ZtLiveScStateSignal":
+                        case Enums.PushMessage.STATE_SIGNAL:
                             // Handled by user
                             Handler(message.MessageType, payload.ToByteArray());
                             break;
-                        case "ZtLiveScStatusChanged":
+                        case Enums.PushMessage.STATUS_CHANGED:
                             var statusChanged = ZtLiveScStatusChanged.Parser.ParseFrom(payload);
                             if (statusChanged.Type == ZtLiveScStatusChanged.Types.Type.LiveClosed || statusChanged.Type == ZtLiveScStatusChanged.Types.Type.LiveBanned)
                             {
@@ -341,7 +370,7 @@ namespace AcFunDanmu
                                 await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Live closed", default);
                             }
                             break;
-                        case "ZtLiveScTicketInvalid":
+                        case Enums.PushMessage.TICKET_INVALID:
                             var ticketInvalid = ZtLiveScTicketInvalid.Parser.ParseFrom(payload);
                             TicketIndex = (TicketIndex + 1) % Tickets.Length;
                             await client.SendAsync(EnterRoom(), WebSocketMessageType.Binary, true, default);
@@ -384,14 +413,14 @@ namespace AcFunDanmu
                 ZtCommonInfo = new ZtCommonInfo
                 {
                     Kpn = KPN,
-                    Kpf = "OUTSIDE_ANDROID_H5",
+                    Kpf = KPF,
                     Uid = UserId,
                 }
             };
 
             var payload = new UpstreamPayload
             {
-                Command = "Basic.Register",
+                Command = Enums.Command.REGISTER,
                 SeqId = SeqId++,
                 RetryCount = RetryCount,
                 PayloadData = request.ToByteString(),
@@ -424,7 +453,7 @@ namespace AcFunDanmu
 
             var payload = new UpstreamPayload
             {
-                Command = "Basic.Unregister",
+                Command = Enums.Command.UNREGISTER,
                 RetryCount = RetryCount,
                 PayloadData = unregister.ToByteString(),
                 SubBiz = SubBiz
@@ -453,7 +482,7 @@ namespace AcFunDanmu
 
             var payload = new UpstreamPayload
             {
-                Command = "Basic.Ping",
+                Command = Enums.Command.PING,
                 SeqId = SeqId,
                 RetryCount = RetryCount,
                 PayloadData = ping.ToByteString(),
@@ -485,7 +514,7 @@ namespace AcFunDanmu
 
             var cmd = new ZtLiveCsCmd
             {
-                CmdType = "ZtLiveCsEnterRoom",
+                CmdType = Enums.GlobalCommand.ENTER_ROOM,
                 Payload = request.ToByteString(),
                 Ticket = Tickets[TicketIndex],
                 LiveId = LiveId,
@@ -493,7 +522,7 @@ namespace AcFunDanmu
 
             var payload = new UpstreamPayload
             {
-                Command = "Global.ZtLiveInteractive.CsCmd",
+                Command = Enums.Command.GLOBAL_COMMAND,
                 SeqId = SeqId++,
                 RetryCount = RetryCount,
                 PayloadData = cmd.ToByteString(),
@@ -526,7 +555,7 @@ namespace AcFunDanmu
 
             var payload = new UpstreamPayload
             {
-                Command = "Basic.KeepAlive",
+                Command = Enums.Command.KEEP_ALIVE,
                 SeqId = SeqId,
                 RetryCount = RetryCount,
                 PayloadData = keepalive.ToByteString(),
@@ -553,7 +582,7 @@ namespace AcFunDanmu
         {
             var msg = new UpstreamPayload
             {
-                Command = "Push.ZtLiveInteractive.Message",
+                Command = Enums.Command.PUSH_MESSAGE,
                 SeqId = SeqId,
                 RetryCount = RetryCount,
                 SubBiz = SubBiz
@@ -585,7 +614,7 @@ namespace AcFunDanmu
 
             var cmd = new ZtLiveCsCmd
             {
-                CmdType = "ZtLiveCsHeartbeat",
+                CmdType = Enums.GlobalCommand.HEARTBEAT,
                 Payload = hearbeat.ToByteString(),
                 Ticket = Tickets[TicketIndex],
                 LiveId = LiveId,
@@ -593,7 +622,7 @@ namespace AcFunDanmu
 
             var payload = new UpstreamPayload
             {
-                Command = "Global.ZtLiveInteractive.CsCmd",
+                Command = Enums.Command.GLOBAL_COMMAND,
                 SeqId = SeqId,
                 RetryCount = RetryCount,
                 PayloadData = cmd.ToByteString(),
@@ -657,7 +686,7 @@ namespace AcFunDanmu
         {
             var (headerLength, payloadLength) = DecodeLengths(bytes);
 
-            PacketHeader header = DecodeHeader(bytes, headerLength);
+            PacketHeader header = DecodeHeader(bytes, headerLength, PrintHeader);
 
             byte[] payload;
             if (header.EncryptionMode != PacketHeader.Types.EncryptionMode.KEncryptionNone)
@@ -692,7 +721,7 @@ namespace AcFunDanmu
         {
             var (headerLength, payloadLength) = DecodeLengths(bytes);
 
-            PacketHeader header = DecodeHeader(bytes, headerLength);
+            PacketHeader header = DecodeHeader(bytes, headerLength, PrintHeader);
 
             byte[] payload;
             if (header.EncryptionMode != PacketHeader.Types.EncryptionMode.KEncryptionNone)
@@ -728,10 +757,14 @@ namespace AcFunDanmu
             return downstream;
         }
 
-        internal static PacketHeader DecodeHeader(byte[] bytes, int headerLength)
+        internal static PacketHeader DecodeHeader(byte[] bytes, int headerLength, bool print)
         {
-            PacketHeader header;
-            header = PacketHeader.Parser.ParseFrom(bytes, Offset, headerLength);
+            PacketHeader header = PacketHeader.Parser.ParseFrom(bytes, Offset, headerLength);
+
+            if (print)
+            {
+                Console.WriteLine("Header SeqId: {0}", header.SeqId);
+            }
 
             return header;
         }
@@ -823,7 +856,7 @@ namespace AcFunDanmu
 
         public static object Parse(string type, ByteString payload)
         {
-            var t = Type.GetType(type);
+            var t = Type.GetType($"AcFunDanmu.{type}");
             if (t != null)
             {
                 var pt = typeof(MessageParser<>).MakeGenericType(new Type[] { t });
@@ -840,6 +873,45 @@ namespace AcFunDanmu
                 Console.WriteLine(payload.ToBase64());
                 return null;
             }
+        }
+
+        internal static bool LoadCookies(CookieContainer container)
+        {
+            var dir = new DirectoryInfo(".");
+            var file = dir.GetFiles("cookies.txt");
+
+            if (file.Count() == 1)
+            {
+                using var cookies = file[0].OpenText();
+
+                Regex re = new Regex(@"^(?<host>[\w\.]+)\s+(?<host_only>TRUE|FALSE)\s+(?<path>.*?)\s+(?<secure>TRUE|FALSE)\s+(?<expire>\d+)\s+(?<name>.*?)\s+(?<value>.*?)$", RegexOptions.Multiline);
+
+                var matches = re.Matches(cookies.ReadToEnd());
+
+                foreach (Match match in matches)
+                {
+#if DEBUG
+                    Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}", match.Groups["host"].Value, match.Groups["host_only"].Value, match.Groups["path"].Value, match.Groups["secure"].Value, match.Groups["expire"].Value, match.Groups["name"].Value, match.Groups["value"].Value);
+#endif
+                    var cookie = new Cookie
+                    {
+                        Domain = match.Groups["host"].Value,
+                        HttpOnly = match.Groups["host_only"].Value == "TRUE",
+                        Secure = match.Groups["secure"].Value == "TRUE",
+                        Path = match.Groups["path"].Value,
+                        Name = match.Groups["name"].Value,
+                        Value = match.Groups["value"].Value
+                    };
+                    long expire = long.Parse(match.Groups["expire"].Value);
+                    if (expire > 0)
+                    {
+                        cookie.Expires = DateTime.FromFileTimeUtc(expire);
+                    }
+                    container.Add(cookie);
+                }
+                return true;
+            }
+            return false;
         }
         #endregion
     }

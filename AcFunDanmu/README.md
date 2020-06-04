@@ -1,6 +1,6 @@
 # AcfunDanmu AcFun直播弹幕工具
 
-Source: [mplayer.js](https://cdnfile.aixifan.com/static/@ks/mplayer.5d57772120f807160aed.js)
+Source: [6.js](https://cdnfile.aixifan.com/static/js/6.c9255644.js)
 
 ## AcFun直播websocket数据结构
 
@@ -14,8 +14,10 @@ Source: [mplayer.js](https://cdnfile.aixifan.com/static/@ks/mplayer.5d57772120f8
 ## AcFun直播websocket流程
 ### 前置流程
 1. 请求`https://m.acfun.cn`获取`_did`Cookies
-2. 发送Ajax POST请求`https://id.app.acfun.cn/rest/app/visitor/login`，表单数据为`sid=acfun.api.visitor`，获取`userId`、`acSecurity`和`acfun.api.visitor_st`
-3. 发送Ajax POST请求`https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=OUTSIDE_ANDROID_H5&userId=[userId]&did=[_did]&acfun.api.visitor_st=[acfun.api.visitor_st]`，表单数据为`authorId=[播主Id]`，获取`availableTickets`、`liveId`和`enterRoomAttach`
+2. 未登录用户发送AJAX POST请求`https://id.app.acfun.cn/rest/app/visitor/login`，表单数据为`sid=acfun.api.visitor`，获取`userId`、`acSecurity`和`acfun.api.visitor_st`
+已登录用户发送AJAX POST请求`https://id.app.acfun.cn/rest/web/token/get`，表单数据为`sid=acfun.midground.api`，获取`userId`、`acSecurity`和`acfun.midground.api_st`
+3. 发送AJAX POST请求`https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId=[userId]&did=[_did]&acfun.api.visitor_st=[acfun.api.visitor_st/acfun.midground.api_st]`，表单数据为`authorId=[播主Id]`，获取`availableTickets`、`liveId`和`enterRoomAttach`
+4. 发送AJAX POST请求`http://api.kuaishouzt.com/rest/zt/live/web/gift/list?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId=[userId]&did=[_did]&acfun.midground.api_st=[acfun.api.visitor_st/acfun.midground.api_st]`，表单数据为`visitorId=[userId]&liveId=[liveId]`，获取礼物列表
 ### 正式流程
 1. 建立websocket链接`wss://link.xiatou.com/`
 2. 发送RegisterRequest，`encryptionMode`为`KEncryptionServiceToken`，加密密钥为`acSecurity`
