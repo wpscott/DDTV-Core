@@ -11,9 +11,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DDTV-MPV", "DDTV-MPV\DDTV-M
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AcFunLiveServer", "AcFunLiveServer\AcFunLiveServer.csproj", "{789E1CC4-4294-4281-9FDE-326AA6CB80A5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AcFunDanmu", "AcFunDanmu\AcFunDanmu.csproj", "{ACD57C05-0E22-4E81-820C-3A00762CBA40}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AcFunDanmuConsole", "AcFunDanmuConsole\AcFunDanmuConsole.csproj", "{B22052D7-1F17-4BD0-BED1-2219C0FC8231}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7A26E186-C55A-4424-913D-8A84BD1A94B9}"
+	ProjectSection(SolutionItems) = preProject
+		README.md = README.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -55,22 +56,6 @@ Global
 		{789E1CC4-4294-4281-9FDE-326AA6CB80A5}.Release|Any CPU.Build.0 = Release|Any CPU
 		{789E1CC4-4294-4281-9FDE-326AA6CB80A5}.Release|x64.ActiveCfg = Release|Any CPU
 		{789E1CC4-4294-4281-9FDE-326AA6CB80A5}.Release|x64.Build.0 = Release|Any CPU
-		{ACD57C05-0E22-4E81-820C-3A00762CBA40}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ACD57C05-0E22-4E81-820C-3A00762CBA40}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ACD57C05-0E22-4E81-820C-3A00762CBA40}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{ACD57C05-0E22-4E81-820C-3A00762CBA40}.Debug|x64.Build.0 = Debug|Any CPU
-		{ACD57C05-0E22-4E81-820C-3A00762CBA40}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ACD57C05-0E22-4E81-820C-3A00762CBA40}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ACD57C05-0E22-4E81-820C-3A00762CBA40}.Release|x64.ActiveCfg = Release|Any CPU
-		{ACD57C05-0E22-4E81-820C-3A00762CBA40}.Release|x64.Build.0 = Release|Any CPU
-		{B22052D7-1F17-4BD0-BED1-2219C0FC8231}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B22052D7-1F17-4BD0-BED1-2219C0FC8231}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B22052D7-1F17-4BD0-BED1-2219C0FC8231}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B22052D7-1F17-4BD0-BED1-2219C0FC8231}.Debug|x64.Build.0 = Debug|Any CPU
-		{B22052D7-1F17-4BD0-BED1-2219C0FC8231}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B22052D7-1F17-4BD0-BED1-2219C0FC8231}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B22052D7-1F17-4BD0-BED1-2219C0FC8231}.Release|x64.ActiveCfg = Release|Any CPU
-		{B22052D7-1F17-4BD0-BED1-2219C0FC8231}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
