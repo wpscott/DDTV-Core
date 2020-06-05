@@ -1,4 +1,6 @@
-﻿using Google.Protobuf;
+﻿using AcFunDanmu.Enums;
+using AcFunDanmu.Models.Client;
+using Google.Protobuf;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,7 +11,6 @@ using System.Net.Http;
 using System.Net.WebSockets;
 using System.Security.Cryptography;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace AcFunDanmu
@@ -41,21 +42,41 @@ namespace AcFunDanmu
             "?",
             "?",
             "生日快乐",
-            "六一快乐"
+            "六一快乐",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
+            "?",
         };
 
+        private const string ACCEPTED_ENCODING = "gzip, deflate, br";
+        private const string VISITOR_ST = "acfun.api.visitor_st";
+        private const string MIDGROUND_ST = "acfun.midground.api_st";
         private const string _ACFUN_HOST = "https://live.acfun.cn";
         private static readonly Uri ACFUN_HOST = new Uri(_ACFUN_HOST);
+        private const string ACFUN_LOGIN_URL = "https://www.acfun.cn/login";
+        private static readonly Uri ACFUN_LOGIN_URI = new Uri(ACFUN_LOGIN_URL);
+        private const string ACFUN_SIGN_IN_URL = "https://id.app.acfun.cn/rest/web/login/signin";
+        private static readonly Uri ACFUN_SIGN_IN_URI = new Uri(ACFUN_SIGN_IN_URL);
+        private const string ACFUN_SAFETY_ID_URL = "https://sec-cdn.gifshow.com/safetyid";
+        private static readonly Uri ACFUN_SAFETY_ID_URI = new Uri(ACFUN_SAFETY_ID_URL);
         private const string LIVE_URL = "https://live.acfun.cn/live";
         private const string LOGIN_URL = "https://id.app.acfun.cn/rest/app/visitor/login";
         private static readonly Uri LOGIN_URI = new Uri(LOGIN_URL);
         private const string GET_TOKEN_URL = "https://id.app.acfun.cn/rest/web/token/get";
         private static readonly Uri GET_TOKEN_URI = new Uri(GET_TOKEN_URL);
-        private const string PLAY_URL = "https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId={0}&did={1}&acfun.api.visitor_st={2}";
-        private const string GIFT_URL = "http://api.kuaishouzt.com/rest/zt/live/web/gift/list?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId={0}&did={1}&acfun.midground.api_st={2}";
+        private const string PLAY_URL = "https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId={0}&did={1}&{2}={3}";
+        private const string GIFT_URL = "https://api.kuaishouzt.com/rest/zt/live/web/gift/list?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId={0}&did={1}&{2}={3}";
+        private const string WATCHING_URL = "https://api.kuaishouzt.com/rest/zt/live/web/watchingList?subBiz=mainApp&kpn=ACFUN_APP&kpf=PC_WEB&userId={0}&did={1}&{2}={3}";
 
         private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36";
 
+        private const string SAFETY_ID_CONTENT = "{{\"platform\":5,\"app_version\":\"2.0.32\",\"device_id\":\"null\",\"user_id\":\"{0}\"}}";
         private static readonly Dictionary<string, string> LOGIN_FORM = new Dictionary<string, string> { { "sid", "acfun.api.visitor" } };
         private static readonly Dictionary<string, string> GET_TOKEN_FORM = new Dictionary<string, string> { { "sid", "acfun.midground.api" } };
 
@@ -75,6 +96,10 @@ namespace AcFunDanmu
         public SignalHandler Handler { get; set; }
 
         #region Properties and Fields
+        private static readonly CookieContainer CookieContainer = new CookieContainer();
+        private static string DeviceId;
+        private static bool IsSignIn = false;
+
         private long UserId = -1;
         private string ServiceToken;
         private string SecurityKey;
@@ -84,7 +109,6 @@ namespace AcFunDanmu
 
         private long InstanceId = 0;
         private string SessionKey;
-        private long HeaartbeatInterval;
         private long Lz4CompressionThreshold;
 
         private long SeqId = 1;
@@ -107,6 +131,11 @@ namespace AcFunDanmu
             Initialize(uid).Wait();
         }
 
+        public Client(string username, string password, string uid) : this()
+        {
+            Login(username, password, uid).Wait();
+        }
+
         public Client(long userId, string serviceToken, string securityKey, string[] tickets, string enterRoomAttach, string liveId) : this()
         {
             UserId = userId;
@@ -124,23 +153,86 @@ namespace AcFunDanmu
         }
         #endregion
 
+        private async Task Login(string username, string password, string uid)
+        {
+            if (!IsSignIn)
+            {
+#if DEBUG
+                Console.WriteLine("Client signing in");
+#endif
+                using var client = new HttpClient(
+                    new HttpClientHandler
+                    {
+                        AutomaticDecompression = DecompressionMethods.All,
+                        UseCookies = true,
+                        CookieContainer = CookieContainer
+                    }
+                );
+                client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+                client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(ACCEPTED_ENCODING);
+
+                using var login = await client.GetAsync(ACFUN_LOGIN_URI);
+                if (!login.IsSuccessStatusCode)
+                {
+                    Console.WriteLine(await login.Content.ReadAsStringAsync());
+                    return;
+                }
+
+                using var signinContent = new FormUrlEncodedContent(new Dictionary<string, string>
+                {
+                    {"username", username },
+                    {"password", password },
+                    {"key", null },
+                    {"captcha", null}
+                });
+                using var signin = await client.PostAsync(ACFUN_SIGN_IN_URI, signinContent);
+                if (!signin.IsSuccessStatusCode)
+                {
+                    Console.WriteLine(await signin.Content.ReadAsStringAsync());
+                    return;
+                }
+                var user = await JsonSerializer.DeserializeAsync<SignIn>(await signin.Content.ReadAsStreamAsync());
+
+                using var sidContent = new StringContent(string.Format(SAFETY_ID_CONTENT, user.userId));
+                using var sid = await client.PostAsync(ACFUN_SAFETY_ID_URI, sidContent);
+                if (!sid.IsSuccessStatusCode)
+                {
+                    Console.WriteLine(await sid.Content.ReadAsStringAsync());
+                    return;
+                }
+                var safetyid = await JsonSerializer.DeserializeAsync<SafetyId>(await sid.Content.ReadAsStreamAsync());
+
+                CookieContainer.Add(new Cookie
+                {
+                    Domain = ".acfun.cn",
+                    Name = "safety_id",
+                    Value = safetyid.safety_id
+                });
+
+                IsSignIn = true;
+
+#if DEBUG
+                Console.WriteLine("Client signed in");
+#endif
+            }
+
+            await Initialize(uid);
+        }
+
         private async Task Initialize(string uid)
         {
             Console.WriteLine("Client initializing");
-            var Cookies = new CookieContainer();
 
-            var loaded = LoadCookies(Cookies);
-
-            var client = new HttpClient(
+            using var client = new HttpClient(
                 new HttpClientHandler
                 {
                     AutomaticDecompression = DecompressionMethods.All,
                     UseCookies = true,
-                    CookieContainer = Cookies
+                    CookieContainer = CookieContainer
                 }
             );
             client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
-            client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
+            client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(ACCEPTED_ENCODING);
 
             using var index = await client.GetAsync($"{LIVE_URL}/{uid}");
             if (!index.IsSuccessStatusCode)
@@ -148,22 +240,24 @@ namespace AcFunDanmu
                 Console.WriteLine(await index.Content.ReadAsStringAsync());
                 return;
             }
-            var deviceId = Cookies.GetCookies(ACFUN_HOST).Where(cookie => cookie.Name == "_did").First().Value;
-
-            if (loaded)
+            if (string.IsNullOrEmpty(DeviceId))
             {
-                using var gettokenContent = new FormUrlEncodedContent(GET_TOKEN_FORM);
-                using var gettoken = await client.PostAsync(GET_TOKEN_URI, gettokenContent);
-                if (!gettoken.IsSuccessStatusCode)
+                DeviceId = CookieContainer.GetCookies(ACFUN_HOST).Where(cookie => cookie.Name == "_did").First().Value;
+            }
+
+            if (IsSignIn)
+            {
+                using var getcontent = new FormUrlEncodedContent(GET_TOKEN_FORM);
+                using var get = await client.PostAsync(GET_TOKEN_URI, getcontent);
+                if (!get.IsSuccessStatusCode)
                 {
-                    Console.WriteLine(await gettoken.Content.ReadAsStringAsync());
+                    Console.WriteLine(await get.Content.ReadAsStringAsync());
                     return;
                 }
-                using var tokenData = await JsonDocument.ParseAsync(await gettoken.Content.ReadAsStreamAsync());
-
-                UserId = tokenData.RootElement.GetProperty("userId").GetInt64();
-                ServiceToken = tokenData.RootElement.GetProperty("acfun.api.visitor_st").ToString();
-                SecurityKey = tokenData.RootElement.GetProperty("acSecurity").ToString();
+                var token = await JsonSerializer.DeserializeAsync<MidgroundToken>(await get.Content.ReadAsStreamAsync());
+                UserId = token.userId;
+                ServiceToken = token.service_token;
+                SecurityKey = token.ssecurity;
             }
             else
             {
@@ -174,15 +268,15 @@ namespace AcFunDanmu
                     Console.WriteLine(await login.Content.ReadAsStringAsync());
                     return;
                 }
-                using var loginData = await JsonDocument.ParseAsync(await login.Content.ReadAsStreamAsync());
+                var token = await JsonSerializer.DeserializeAsync<VisitorToken>(await login.Content.ReadAsStreamAsync());
 
-                UserId = loginData.RootElement.GetProperty("userId").GetInt64();
-                ServiceToken = loginData.RootElement.GetProperty("acfun.api.visitor_st").ToString();
-                SecurityKey = loginData.RootElement.GetProperty("acSecurity").ToString();
+                UserId = token.userId;
+                ServiceToken = token.service_token;
+                SecurityKey = token.acSecurity;
             }
 
             using var form = new FormUrlEncodedContent(new Dictionary<string, string> { { "authorId", uid } });
-            using var play = await client.PostAsync(string.Format(PLAY_URL, UserId, deviceId, ServiceToken), form);
+            using var play = await client.PostAsync(string.Format(PLAY_URL, UserId, DeviceId, IsSignIn ? MIDGROUND_ST : VISITOR_ST, ServiceToken), form);
 
             if (!play.IsSuccessStatusCode)
             {
@@ -190,25 +284,88 @@ namespace AcFunDanmu
                 return;
             }
 
-            using var playData = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
-            if (playData.RootElement.GetProperty("result").GetInt32() != 1)
+            var playData = await JsonSerializer.DeserializeAsync<Play>(await play.Content.ReadAsStreamAsync());
+            if (playData.result != 1)
             {
-                Console.WriteLine(playData.RootElement.GetProperty("error_msg").GetString());
+                Console.WriteLine(playData.error_msg);
                 return;
             }
-            Tickets = playData.RootElement.GetProperty("data").GetProperty("availableTickets").EnumerateArray().Select(ticket => ticket.ToString()).ToArray();
-            EnterRoomAttach = playData.RootElement.GetProperty("data").GetProperty("enterRoomAttach").ToString();
-            LiveId = playData.RootElement.GetProperty("data").GetProperty("liveId").ToString();
+            Tickets = playData.data.availableTickets;
+            EnterRoomAttach = playData.data.enterRoomAttach;
+            LiveId = playData.data.liveId;
+
+
+            UpdateGiftList();
 
             Console.WriteLine("Client initialized");
         }
 
-        public async Task Start()
+        private async void UpdateGiftList()
+        {
+            using var client = new HttpClient(
+               new HttpClientHandler
+               {
+                   AutomaticDecompression = DecompressionMethods.All,
+                   UseCookies = true,
+                   CookieContainer = CookieContainer
+               }
+            );
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+            client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(ACCEPTED_ENCODING);
+
+            using var giftContent = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                {"visitorId", $"{UserId}" },
+                {"liveId", LiveId }
+            });
+            using var gift = await client.PostAsync(string.Format(GIFT_URL, UserId, DeviceId, IsSignIn ? MIDGROUND_ST : VISITOR_ST, ServiceToken), giftContent);
+            var giftList = await JsonSerializer.DeserializeAsync<GiftList>(await gift.Content.ReadAsStreamAsync());
+            foreach (var item in giftList.data.giftList)
+            {
+                Gifts[item.giftId] = item.giftName;
+            }
+
+            Console.WriteLine("Gift list updated");
+        }
+
+        public async Task<WatchingList.WatchingData.User[]> WatchingList()
+        {
+            if (UserId == -1 || string.IsNullOrEmpty(ServiceToken) || string.IsNullOrEmpty(SecurityKey) || string.IsNullOrEmpty(LiveId) || string.IsNullOrEmpty(EnterRoomAttach) || Tickets == null)
+            {
+                return Array.Empty<WatchingList.WatchingData.User>();
+            }
+            using var client = new HttpClient(
+               new HttpClientHandler
+               {
+                   AutomaticDecompression = DecompressionMethods.All,
+                   UseCookies = true,
+                   CookieContainer = CookieContainer
+               }
+            );
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
+            client.DefaultRequestHeaders.AcceptEncoding.ParseAdd(ACCEPTED_ENCODING);
+
+            using var watchingContent = new FormUrlEncodedContent(new Dictionary<string, string>
+            {
+                {"visitorId", $"{UserId}" },
+                {"liveId", LiveId }
+            });
+            using var watching = await client.PostAsync(string.Format(WATCHING_URL, UserId, DeviceId, IsSignIn ? MIDGROUND_ST : VISITOR_ST, ServiceToken), watchingContent);
+            if (!watching.IsSuccessStatusCode)
+            {
+                return Array.Empty<WatchingList.WatchingData.User>();
+            }
+            var watchingList = await JsonSerializer.DeserializeAsync<WatchingList>(await watching.Content.ReadAsStreamAsync());
+
+            return watchingList.data.list;
+        }
+
+        public async Task<bool> Start()
         {
             if (UserId == -1 || string.IsNullOrEmpty(ServiceToken) || string.IsNullOrEmpty(SecurityKey) || string.IsNullOrEmpty(LiveId) || string.IsNullOrEmpty(EnterRoomAttach) || Tickets == null)
             {
                 Console.WriteLine("Not initialized or live is ended");
-                return;
+                return false;
             }
             using var client = new ClientWebSocket();
 
@@ -291,6 +448,8 @@ namespace AcFunDanmu
                 }
                 #endregion
             }
+
+            return client.State == WebSocketState.Closed;
         }
 
         async void HandleCommand(ClientWebSocket client, DownstreamPayload stream, System.Timers.Timer heartbeatTimer)
@@ -298,17 +457,17 @@ namespace AcFunDanmu
             if (stream == null) { return; }
             switch (stream.Command)
             {
-                case Enums.Command.GLOBAL_COMMAND:
+                case Command.GLOBAL_COMMAND:
                     ZtLiveCsCmdAck cmd = ZtLiveCsCmdAck.Parser.ParseFrom(stream.PayloadData);
 
                     switch (cmd.CmdAckType)
                     {
-                        case Enums.GlobalCommand.ENTER_ROOM_ACK:
+                        case GlobalCommand.ENTER_ROOM_ACK:
                             var enterRoom = ZtLiveCsEnterRoomAck.Parser.ParseFrom(cmd.Payload);
                             heartbeatTimer.Interval = enterRoom.HeartbeatIntervalMs;
                             heartbeatTimer.Start();
                             break;
-                        case Enums.GlobalCommand.HEARTBEAT_ACK:
+                        case GlobalCommand.HEARTBEAT_ACK:
                             var heartbeat = ZtLiveCsHeartbeatAck.Parser.ParseFrom(cmd.Payload);
                             break;
                         default:
@@ -317,17 +476,17 @@ namespace AcFunDanmu
                             break;
                     }
                     break;
-                case Enums.Command.KEEP_ALIVE:
+                case Command.KEEP_ALIVE:
                     var keepalive = KeepAliveResponse.Parser.ParseFrom(stream.PayloadData);
                     break;
-                case Enums.Command.PING:
+                case Command.PING:
                     var ping = PingResponse.Parser.ParseFrom(stream.PayloadData);
                     break;
-                case Enums.Command.UNREGISTER:
+                case Command.UNREGISTER:
                     var unregister = UnregisterResponse.Parser.ParseFrom(stream.PayloadData);
                     await client.CloseAsync(WebSocketCloseStatus.NormalClosure, "Unregister", default);
                     break;
-                case Enums.Command.PUSH_MESSAGE:
+                case Command.PUSH_MESSAGE:
                     await client.SendAsync(PushMessage(), WebSocketMessageType.Binary, true, default);
                     ZtLiveScMessage message = ZtLiveScMessage.Parser.ParseFrom(stream.PayloadData);
 
@@ -854,45 +1013,6 @@ namespace AcFunDanmu
                 Console.WriteLine(payload.ToBase64());
                 return null;
             }
-        }
-
-        internal static bool LoadCookies(CookieContainer container)
-        {
-            var dir = new DirectoryInfo(".");
-            var file = dir.GetFiles("cookies.txt");
-
-            if (file.Count() == 1)
-            {
-                using var cookies = file[0].OpenText();
-
-                Regex re = new Regex(@"^(?<host>[\w\.]+)\s+(?<host_only>TRUE|FALSE)\s+(?<path>.*?)\s+(?<secure>TRUE|FALSE)\s+(?<expire>\d+)\s+(?<name>.*?)\s+(?<value>.*?)$", RegexOptions.Multiline);
-
-                var matches = re.Matches(cookies.ReadToEnd());
-
-                foreach (Match match in matches)
-                {
-#if DEBUG
-                    Console.WriteLine("{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}", match.Groups["host"].Value, match.Groups["host_only"].Value, match.Groups["path"].Value, match.Groups["secure"].Value, match.Groups["expire"].Value, match.Groups["name"].Value, match.Groups["value"].Value);
-#endif
-                    var cookie = new Cookie
-                    {
-                        Domain = match.Groups["host"].Value,
-                        HttpOnly = match.Groups["host_only"].Value == "TRUE",
-                        Secure = match.Groups["secure"].Value == "TRUE",
-                        Path = match.Groups["path"].Value,
-                        Name = match.Groups["name"].Value,
-                        Value = match.Groups["value"].Value
-                    };
-                    long expire = long.Parse(match.Groups["expire"].Value);
-                    if (expire > 0)
-                    {
-                        cookie.Expires = DateTime.FromFileTimeUtc(expire);
-                    }
-                    container.Add(cookie);
-                }
-                return true;
-            }
-            return false;
         }
         #endregion
     }
