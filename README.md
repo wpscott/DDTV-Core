@@ -4,6 +4,8 @@ DDTV-Core是用C# 和 .Net Core 3.1编写的AcFun/BiliBili直播播放工具。
 该项目分为4个子项目。
 **不提供32位程序。**
 
+**AcFun弹幕相关已移至[AcFunDanmaku](https://github.com/wpscott/AcFunDanmaku)**
+
 ## AcFunLiveServer
 AcFunLiveServer是一个简单的控制台项目用于获取AcFun的直播视频流。
 ### 使用方式
