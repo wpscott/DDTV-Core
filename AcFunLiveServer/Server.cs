@@ -11,14 +11,14 @@ namespace AcFunLiveServer
 {
     public static class Server
     {
-        private const string _HOST = "https://m.acfun.cn";
+        private const string _HOST = "https://live.acfun.cn";
         private static readonly Uri HOST = new Uri(_HOST);
-        private const string LIVE_URL = "https://m.acfun.cn/live/detail";
+        private const string LIVE_URL = "https://live.acfun.cn/live";
         private const string LOGIN_URL = "https://id.app.acfun.cn/rest/app/visitor/login";
         private static readonly Uri LOGIN_URI = new Uri(LOGIN_URL);
         private const string PLAY_URL = "https://api.kuaishouzt.com/rest/zt/live/web/startPlay?subBiz=mainApp&kpn=ACFUN_APP&kpf=OUTSIDE_IOS_H5&userId={0}&did={1}&acfun.api.visitor_st={2}";
 
-        private const string UserAgent = "Mozilla/5.0 (iPad; CPU iPhone OS 13_2_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0.3 Mobile/15E148 Safari/604.1";
+        private const string UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36";
 
         private const int Port = 62114;
         private static readonly Encoding Encoding = Encoding.UTF8;
