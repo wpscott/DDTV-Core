@@ -6,6 +6,7 @@
     <RootNamespace>DDTV_FFmpeg</RootNamespace>
     <UseWPF>true</UseWPF>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	  <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>

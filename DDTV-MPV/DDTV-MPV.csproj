@@ -5,6 +5,7 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>DDTV_MPV</RootNamespace>
     <UseWindowsForms>true</UseWindowsForms>
+	  <Platforms>x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
