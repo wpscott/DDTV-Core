@@ -6,4 +6,8 @@
 	  <Platforms>x64</Platforms>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AcFunDanmu" Version="1.0.2" />
+  </ItemGroup>
+
 </Project>

@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using AcFunDanmu;
 
 namespace AcFunLiveServer
 {
@@ -47,8 +48,72 @@ namespace AcFunLiveServer
                     CookieContainer = Cookies
                 }
             );
-            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent); // Mobile only
+            client.DefaultRequestHeaders.UserAgent.ParseAdd(UserAgent);
             client.DefaultRequestHeaders.AcceptEncoding.ParseAdd("gzip, deflate, br");
+        }
+
+
+        public static async Task Start(string username, string password)
+        {
+            server.Start();
+
+            Console.WriteLine("AcFun live server is ready");
+            while (true)
+            {
+                var context = await server.GetContextAsync();
+
+                var req = context.Request;
+                using var resp = context.Response;
+
+                try
+                {
+                    var path = req.Url.LocalPath.Substring(1);
+                    if (long.TryParse(path, out var uid)) // Get user id
+                    {
+                        Console.WriteLine("Found user id: {0}", uid);
+
+                        var client = new Client();
+
+                        await client.Login(username, password);
+                        var data = await client.Initialize(uid.ToString());
+                        if (!string.IsNullOrEmpty(data.videoPlayRes))
+                        {
+                            using var playRes = JsonDocument.Parse(data.videoPlayRes);
+
+                            //redirect to stream url (highest bitrate)
+                            resp.StatusCode = 302;
+                            resp.RedirectLocation = playRes.RootElement
+                                .GetProperty("liveAdaptiveManifest")
+                                .EnumerateArray().First()
+                                .GetProperty("adaptationSet")
+                                .GetProperty("representation")
+                                .EnumerateArray()
+                                .OrderByDescending(rep => rep.GetProperty("bitrate").GetInt32())
+                                .First()
+                                .GetProperty("url")
+                                .ToString();
+
+                            Connect(client);
+                        }
+                        else
+                        {
+                            WriteContent(uid, resp, 400, "Cannot find source");
+                        }
+
+                    }
+                    else { WriteContent(uid, resp, 400, $"Invalid Request: {path}"); }
+                }
+                catch (JsonException e) { WriteContent(resp, e); }
+                catch (KeyNotFoundException e) { WriteContent(resp, e); }
+                catch (System.IO.IOException e) { WriteContent(resp, e); }
+                catch (Exception e) { WriteContent(resp, e); }
+                finally
+                {
+                    resp.Close();
+
+                    GC.Collect();
+                }
+            }
         }
 
         public static async Task Start()
@@ -118,6 +183,7 @@ namespace AcFunLiveServer
                                     .GetProperty("url")
                                     .ToString();
                             }
+
                         }
                     }
                     else { WriteContent(uid, resp, 400, $"Invalid Request: {path}"); }
@@ -134,6 +200,28 @@ namespace AcFunLiveServer
                     GC.Collect();
                 }
             }
+        }
+
+        internal static async void Connect(Client client)
+        {
+            var retry = 0;
+            var resetTimer = new System.Timers.Timer(5000);
+            resetTimer.Elapsed += (s, e) =>
+            {
+                retry = 0;
+            };
+
+            while (!await client.Start() && retry < 5)
+            {
+                if (retry > 0)
+                {
+                    resetTimer.Stop();
+                }
+                retry++;
+                resetTimer.Start();
+            }
+
+            GC.Collect();
         }
 
         internal static async Task<(string, string, string)> Login()
