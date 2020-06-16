@@ -55,6 +55,7 @@ namespace AcFunLiveServer
 
         public static async Task Start(string username, string password)
         {
+            await Login(username, password);
             server.Start();
 
             Console.WriteLine("AcFun live server is ready");
@@ -62,57 +63,60 @@ namespace AcFunLiveServer
             {
                 var context = await server.GetContextAsync();
 
-                var req = context.Request;
-                using var resp = context.Response;
-
-                try
+                await Task.Run(async () =>
                 {
-                    var path = req.Url.LocalPath.Substring(1);
-                    if (long.TryParse(path, out var uid)) // Get user id
+                    var req = context.Request;
+                    using var resp = context.Response;
+
+                    try
                     {
-                        Console.WriteLine("Found user id: {0}", uid);
-
-                        var client = new Client();
-
-                        await client.Login(username, password);
-                        var data = await client.Initialize(uid.ToString());
-                        if (!string.IsNullOrEmpty(data.videoPlayRes))
+                        var path = req.Url.LocalPath.Substring(1);
+                        if (long.TryParse(path, out var uid)) // Get user id
                         {
-                            using var playRes = JsonDocument.Parse(data.videoPlayRes);
+                            Console.WriteLine("Found user id: {0}", uid);
 
-                            //redirect to stream url (highest bitrate)
-                            resp.StatusCode = 302;
-                            resp.RedirectLocation = playRes.RootElement
-                                .GetProperty("liveAdaptiveManifest")
-                                .EnumerateArray().First()
-                                .GetProperty("adaptationSet")
-                                .GetProperty("representation")
-                                .EnumerateArray()
-                                .OrderByDescending(rep => rep.GetProperty("bitrate").GetInt32())
-                                .First()
-                                .GetProperty("url")
-                                .ToString();
+                            var client = new Client();
 
-                            Connect(client);
+                            //await client.Login(username, password);
+                            var data = await client.Initialize(uid.ToString());
+                            if (!string.IsNullOrEmpty(data.videoPlayRes))
+                            {
+                                using var playRes = JsonDocument.Parse(data.videoPlayRes);
+
+                                //redirect to stream url (highest bitrate)
+                                resp.StatusCode = 302;
+                                resp.RedirectLocation = playRes.RootElement
+                                    .GetProperty("liveAdaptiveManifest")
+                                    .EnumerateArray().First()
+                                    .GetProperty("adaptationSet")
+                                    .GetProperty("representation")
+                                    .EnumerateArray()
+                                    .OrderByDescending(rep => rep.GetProperty("bitrate").GetInt32())
+                                    .First()
+                                    .GetProperty("url")
+                                    .ToString();
+
+                                ConnectToDanmaku(client);
+                            }
+                            else
+                            {
+                                WriteContent(uid, resp, 400, "Cannot find source");
+                            }
+
                         }
-                        else
-                        {
-                            WriteContent(uid, resp, 400, "Cannot find source");
-                        }
-
+                        else { WriteContent(uid, resp, 400, $"Invalid Request: {path}"); }
                     }
-                    else { WriteContent(uid, resp, 400, $"Invalid Request: {path}"); }
-                }
-                catch (JsonException e) { WriteContent(resp, e); }
-                catch (KeyNotFoundException e) { WriteContent(resp, e); }
-                catch (System.IO.IOException e) { WriteContent(resp, e); }
-                catch (Exception e) { WriteContent(resp, e); }
-                finally
-                {
-                    resp.Close();
+                    catch (JsonException e) { WriteContent(resp, e); }
+                    catch (KeyNotFoundException e) { WriteContent(resp, e); }
+                    catch (System.IO.IOException e) { WriteContent(resp, e); }
+                    catch (Exception e) { WriteContent(resp, e); }
+                    finally
+                    {
+                        resp.Close();
 
-                    GC.Collect();
-                }
+                        GC.Collect();
+                    }
+                });
             }
         }
 
@@ -128,90 +132,100 @@ namespace AcFunLiveServer
             {
                 var context = await server.GetContextAsync();
 
-                var req = context.Request;
-                using var resp = context.Response;
-
-                try
+                await Task.Run(async () =>
                 {
-                    var path = req.Url.LocalPath.Substring(1);
-                    if (long.TryParse(path, out var uid)) // Get user id
+                    var req = context.Request;
+                    using var resp = context.Response;
+
+                    try
                     {
-                        Console.WriteLine("Found user id: {0}", uid);
-
-                        var form = new Dictionary<string, string> { { "authorId", $"{uid}" } };
-                        using var post = new FormUrlEncodedContent(form);
-                        using var play = await client.PostAsync(  // Get stream url
-                            string.Format(
-                                PLAY_URL,
-                                visitorId,
-                                deviceId,
-                                serviceToken
-                             ),
-                            post
-                            );
-
-                        if (!play.IsSuccessStatusCode)
+                        var path = req.Url.LocalPath.Substring(1);
+                        if (long.TryParse(path, out var uid)) // Get user id
                         {
-                            WriteContent(uid, resp, 400, await play.Content.ReadAsStringAsync());
-                        }
-                        else
-                        {
-                            using var playData = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
-                            if (playData.RootElement.GetProperty("result").GetInt32() != 1)
+                            Console.WriteLine("Found user id: {0}", uid);
+
+                            var form = new Dictionary<string, string> { { "authorId", $"{uid}" } };
+                            using var post = new FormUrlEncodedContent(form);
+                            using var play = await client.PostAsync(  // Get stream url
+                                string.Format(
+                                    PLAY_URL,
+                                    visitorId,
+                                    deviceId,
+                                    serviceToken
+                                 ),
+                                post
+                                );
+
+                            if (!play.IsSuccessStatusCode)
                             {
-                                WriteContent(uid, resp, 404, playData.RootElement.GetProperty("error_msg").GetString());
+                                WriteContent(uid, resp, 400, await play.Content.ReadAsStringAsync());
                             }
                             else
                             {
-                                using var playRes = JsonDocument.Parse(
-                                    playData.RootElement
-                                    .GetProperty("data")
-                                    .GetProperty("videoPlayRes")
-                                    .ToString()
-                                    );
+                                using var playData = await JsonDocument.ParseAsync(await play.Content.ReadAsStreamAsync());
+                                if (playData.RootElement.GetProperty("result").GetInt32() != 1)
+                                {
+                                    WriteContent(uid, resp, 404, playData.RootElement.GetProperty("error_msg").GetString());
+                                }
+                                else
+                                {
+                                    using var playRes = JsonDocument.Parse(
+                                        playData.RootElement
+                                        .GetProperty("data")
+                                        .GetProperty("videoPlayRes")
+                                        .ToString()
+                                        );
 
-                                //redirect to stream url (highest bitrate)
-                                resp.StatusCode = 302;
-                                resp.RedirectLocation = playRes.RootElement
-                                    .GetProperty("liveAdaptiveManifest")
-                                    .EnumerateArray().First()
-                                    .GetProperty("adaptationSet")
-                                    .GetProperty("representation")
-                                    .EnumerateArray()
-                                    .OrderByDescending(rep => rep.GetProperty("bitrate").GetInt32())
-                                    .First()
-                                    .GetProperty("url")
-                                    .ToString();
+                                    //redirect to stream url (highest bitrate)
+                                    resp.StatusCode = 302;
+                                    resp.RedirectLocation = playRes.RootElement
+                                        .GetProperty("liveAdaptiveManifest")
+                                        .EnumerateArray().First()
+                                        .GetProperty("adaptationSet")
+                                        .GetProperty("representation")
+                                        .EnumerateArray()
+                                        .OrderByDescending(rep => rep.GetProperty("bitrate").GetInt32())
+                                        .First()
+                                        .GetProperty("url")
+                                        .ToString();
+                                }
+
                             }
-
                         }
+                        else { WriteContent(uid, resp, 400, $"Invalid Request: {path}"); }
                     }
-                    else { WriteContent(uid, resp, 400, $"Invalid Request: {path}"); }
-                }
-                catch (HttpRequestException e) { WriteContent(resp, e); }
-                catch (JsonException e) { WriteContent(resp, e); }
-                catch (KeyNotFoundException e) { WriteContent(resp, e); }
-                catch (System.IO.IOException e) { WriteContent(resp, e); }
-                catch (Exception e) { WriteContent(resp, e); }
-                finally
-                {
-                    resp.Close();
+                    catch (HttpRequestException e) { WriteContent(resp, e); }
+                    catch (JsonException e) { WriteContent(resp, e); }
+                    catch (KeyNotFoundException e) { WriteContent(resp, e); }
+                    catch (System.IO.IOException e) { WriteContent(resp, e); }
+                    catch (Exception e) { WriteContent(resp, e); }
+                    finally
+                    {
+                        resp.Close();
 
-                    GC.Collect();
-                }
+                        GC.Collect();
+                    }
+                });
             }
         }
 
-        internal static async void Connect(Client client)
+        internal static async Task Login(string username, string password)
+        {
+            var client = new Client();
+
+            await client.Login(username, password);
+        }
+
+        internal static async void ConnectToDanmaku(Client client)
         {
             var retry = 0;
-            var resetTimer = new System.Timers.Timer(5000);
+            var resetTimer = new System.Timers.Timer(10000);
             resetTimer.Elapsed += (s, e) =>
             {
                 retry = 0;
             };
 
-            while (!await client.Start() && retry < 5)
+            while (!await client.Start() && retry < 3)
             {
                 if (retry > 0)
                 {
